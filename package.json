@@ -6,14 +6,18 @@
   "scripts": {
     "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext js"
+    "lint": "eslint . --ext js",
+    "lint:fix": "eslint . --fix --ext js"
   },
   "author": "Drobenyuk.A",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^5.15.1",
+    "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-node": "^8.0.1",
-    "nodemon": "^1.18.10"
+    "eslint-plugin-prettier": "^3.0.1",
+    "nodemon": "^1.18.10",
+    "prettier": "1.16.4"
   },
   "dependencies": {
     "body-parser": "^1.18.3",

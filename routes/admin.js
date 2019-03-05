@@ -20,7 +20,7 @@ router.use(ROUTES.ADMIN.ROOT, (req, res) => {
     res.status(404).render('404', {
         path: req.path,
         pageTitle: 'Product not found',
-        pageHeader: 'Product not found.'
+        pageHeader: 'Product not found.',
     });
 });
 

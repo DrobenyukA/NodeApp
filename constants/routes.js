@@ -3,5 +3,5 @@ module.exports = {
     ADMIN: {
         ROOT: '/admin',
         ADD_PRODUCT: '/admin/add-product',
-    }
-}
+    },
+};
