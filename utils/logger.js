@@ -32,7 +32,7 @@ function logRequest({ method, path, params, query, body }, res, next) {
         console.log(style(`    params: ${printObject(params)}`));
     }
     if (!_.isEmpty(body)) {
-        console.log(style(`    params: ${printObject(body)}`));
+        console.log(style(`    body: ${printObject(body)}`));
     }
     next();
 }
