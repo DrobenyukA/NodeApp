@@ -1,7 +1,19 @@
 module.exports = {
     ROOT: '/',
     ADMIN: {
-        ROOT: '/admin',
+        BASE: '/admin',
         ADD_PRODUCT: '/admin/add-product',
+    },
+    PRODUCTS: {
+        BASE: '/products',
+    },
+    CART: {
+        BASE: '/cart',
+    },
+    CHECKOUT: {
+        BASE: '/checkout',
+    },
+    ORDERS: {
+        BASE: '/orders',
     },
 };
