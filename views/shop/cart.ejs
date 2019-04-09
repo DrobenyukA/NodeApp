@@ -9,7 +9,15 @@
     <%- include('../includes/navigation.ejs') %>
     <main>
         <h1><%= pageHeader %></h1>
-        
+        <ul>
+            <% products.forEach(({ title, quantity, ...product }) => { %>
+                <li>
+                    <p><%= title %> (<%= quantity %>)</p>
+                    <%- include('../includes/delete-from-cart.ejs', { product }) %>
+                </li>
+            <% }) %>
+        </ul>
+        <p>Total price: <strong><%= totalPrice %></strong></p>
     </main>
     <%- include('../includes/scripts.ejs') %>
 </body>
