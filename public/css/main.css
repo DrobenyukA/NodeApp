@@ -84,11 +84,12 @@ main {
 }
 
 .card__image img {
-  width: auto;
-  height: auto;
   display: block;
-  margin: 0 auto;
+  width: auto;
+  max-width: 100%;
+  height: auto;
   max-height: 200px;
+  margin: 0 auto;
 }
 
 .card__actions {
@@ -98,15 +99,15 @@ main {
 
 .card__actions button,
 .card__actions a {
-    margin: 0 0.25rem;
+    margin: 0.5rem;
 }
 
 .btn {
-  font: inherit;
   border: 1px solid #00695c;
-  color: #00695c;
   background: white;
   border-radius: 3px;
+  color: #00695c;
+  font: inherit;
   cursor: pointer;
 }
 
@@ -114,6 +115,15 @@ main {
 .btn:active {
   background-color: #00695c;
   color: white;
+}
+
+a.btn {
+  padding: 1px 7px 2px;
+  text-decoration: none;
+}
+
+form.btn-wrapper {
+  display: inline-block;
 }
 
 .notice {
@@ -129,4 +139,8 @@ main {
   border-color: rgba(1, 87, 155, 1);
   background-color: rgba(1, 87, 155, .25);
   color: rgba(1, 87, 155, 1);
+}
+
+.text-center{
+  text-align: center;
 }

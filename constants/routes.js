@@ -2,18 +2,21 @@ module.exports = {
     ROOT: '/',
     ADMIN: {
         BASE: '/admin',
-        ADD_PRODUCT: '/admin/add-product',
+        CREATE_PRODUCT: '/admin/product/create',
+        DELETE_PRODUCT: '/admin/product/delete',
+        UPDATE_PRODUCT: '/admin/product/update',
+        EDIT_PRODUCT: '/admin/product/:id/edit',
     },
     PRODUCTS: {
         BASE: '/products',
+        PRODUCT: '/products/:id',
     },
     CART: {
         BASE: '/cart',
-    },
-    CHECKOUT: {
-        BASE: '/checkout',
+        DELETE_ITEM: '/cart/item/delete',
     },
     ORDERS: {
         BASE: '/orders',
+        CHECKOUT: '/checkout',
     },
 };
