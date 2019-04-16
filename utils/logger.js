@@ -8,7 +8,7 @@ const STYLES_MAP = {
     ['POST']: 'blue',
     ['PUT']: 'cyan',
     ['PATCH']: 'magenta',
-    ['DELETE']: 'red',
+    ['DELETE']: 'pink',
     ['OPTION']: 'gray',
     PORT: 'purple',
 };
@@ -37,7 +37,10 @@ function logRequest({ method, path, params, query, body }, res, next) {
     next();
 }
 
+const logError = (error) => console.log(chalk.red(error.message));
+
 module.exports = {
     logRequest,
+    logError,
     printPort,
 };

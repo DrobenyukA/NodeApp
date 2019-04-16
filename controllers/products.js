@@ -1,6 +1,10 @@
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product');
 
+const user = {
+    isAdmin: false,
+};
+
 const getProductForm = (req, res) => {
     res.render('admin/product-form', {
         path: req.path,
@@ -50,9 +54,7 @@ const getProducts = (req, res) => {
             pageTitle: 'Books shop',
             pageHeader: 'My Products',
             products: books,
-            user: {
-                isAdmin: true,
-            },
+            user,
             actions: {
                 addProduct: '',
                 editProduct: '',

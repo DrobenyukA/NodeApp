@@ -1,4 +1,5 @@
 const fileStorage = require('../utils/fileStorage');
+const { pool } = require('../utils/database');
 
 class Product {
     constructor(product) {
@@ -36,7 +37,16 @@ class Product {
     }
 
     static getAll() {
-        return fileStorage.read('books');
+        // return fileStorage.read('books');
+        return pool.execute('SELECT * FROM products').then(([rows]) =>
+            rows.map(({ imageUrl: src, imageAlt: alt, ...product }) => ({
+                ...product,
+                image: {
+                    src,
+                    alt,
+                },
+            })),
+        );
     }
 
     static getLatest() {
