@@ -1,9 +1,14 @@
+const user = {
+    isAdmin: false,
+};
+
 const getIndex = (req, res) => {
     res.render('shop/index', {
         path: req.path,
         pageTitle: 'Home page',
         pageHeader: 'Home page',
         products: [],
+        user,
     });
 };
 
@@ -12,6 +17,7 @@ const getCart = (req, res) => {
         path: req.path,
         pageTitle: 'Cart',
         pageHeader: 'Cart',
+        user,
     });
 };
 
@@ -20,6 +26,7 @@ const getOrders = (req, res) => {
         path: req.path,
         pageTitle: 'Orders',
         pageHeader: 'Orders',
+        user,
     });
 };
 
@@ -28,6 +35,7 @@ const checkout = (req, res) => {
         path: req.path,
         pageTitle: 'Checkout',
         pageHeader: 'Checkout',
+        user,
     });
 };
 

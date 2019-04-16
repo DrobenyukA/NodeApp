@@ -1,5 +1,6 @@
 const fileStorage = require('../utils/fileStorage');
 const { pool } = require('../utils/database');
+const CartModel = require('./cart.model');
 
 class Product {
     constructor(product) {
@@ -31,13 +32,19 @@ class Product {
 
     update() {
         if (this.id) {
-            // TODO: implement me;
+            return fileStorage.read('books').then((books) => {
+                const index = books.findIndex((book) => book.id === this.id);
+                if (index) {
+                    books[index] = this.toObject();
+                    return fileStorage.write('books', books);
+                }
+                throw new Error(`There is no book with id:${this.id}`);
+            });
         }
         return this.store();
     }
 
     static getAll() {
-        // return fileStorage.read('books');
         return pool.execute('SELECT * FROM products').then(([rows]) =>
             rows.map(({ imageUrl: src, imageAlt: alt, ...product }) => ({
                 ...product,
@@ -51,6 +58,35 @@ class Product {
 
     static getLatest() {
         // TODO: implement me
+    }
+
+    static getProduct(id) {
+        return fileStorage.read('books').then((books) => books.find((book) => book.id === id));
+    }
+
+    static delete(id) {
+        return fileStorage.read('books').then((books) =>
+            fileStorage
+                .write('books', books.filter((book) => book.id !== id))
+                .then(() => books.find((book) => book.id === id))
+                .then(({ id, price }) => CartModel.deleteProduct(id, price)),
+        );
+    }
+
+    static getProductsByIds(ids) {
+        return fileStorage.read('books').then((books) => books.filter((book) => !!ids.find((id) => id === book.id)));
+    }
+
+    toObject() {
+        return {
+            id: this.id,
+            title: this.title,
+            price: this.price,
+            image: this.image,
+            description: this.description,
+            created_at: this.created_at,
+            updated_at: new Date().toISOString(),
+        };
     }
 }
 
