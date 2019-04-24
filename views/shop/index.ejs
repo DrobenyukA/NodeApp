@@ -11,13 +11,13 @@
         <h1><%= pageHeader %></h1>
         <% if (products.length) { %>
             <div class="grid">
-                <% products.forEach(({ title, price, description, image }) => { %>
+                <% products.forEach(({ title, price, description, imageSrc, imageAlt }) => { %>
                     <article class="card product-item">
                         <header class="card__header">
                             <h3 class="product__title"><%= title %></h3>
                         </header>
                         <div class="card__image">
-                            <img src="<%= image.src %>" alt="<%= image.alt %>">
+                            <img src="<%= imageSrc %>" alt="<%= imageAlt %>">
                         </div>
                         <div class="card__content">
                             <p class="product__price"><strong>$<%= price %></strong></p>

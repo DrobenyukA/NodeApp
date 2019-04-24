@@ -2,25 +2,28 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../utils/database');
 
-const Cart = sequelize.define('cart', {
+const CartItem = sequelize.define('cartItem', {
     id: {
         type: Sequelize.INTEGER(11),
         autoIncrement: true,
         allowNull: false,
         primaryKey: true,
     },
-    userId: {
+    quantity: {
+        type: Sequelize.INTEGER(11),
+        defaultValue: 1,
+    },
+    cartId: {
         type: Sequelize.INTEGER,
         references: {
-            model: 'Users',
+            model: 'Cart',
             key: 'id',
         },
     },
 });
 
-Cart.associate = (models) => {
-    Cart.belongsTo(models.user, { constraints: true, onDelete: 'CASCADE' });
-    Cart.belongsToMany(models.product, { through: models.cartItem });
+CartItem.associate = (models) => {
+    CartItem.belongsTo(models.cart, { constraints: true, onDelete: 'CASCADE' });
 };
 
-module.exports = Cart;
+module.exports = CartItem;

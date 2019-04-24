@@ -1,9 +1,8 @@
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product.model');
-const CartModel = require('../models/cart.model');
 
 const user = {
-    isAdmin: false,
+    isAdmin: true,
 };
 
 const createProduct = (req, res) => {
@@ -19,18 +18,30 @@ const createProduct = (req, res) => {
 
 const storeProduct = (req, res) => {
     // TODO: add book validation
-    const product = new ProductModel({
-        id: req.body.id,
-        title: req.body.title,
-        price: req.body.price,
-        image: {
-            src: req.body.imageSrc,
-            alt: req.body.imageAlt,
-        },
-        description: req.body.description,
-    });
-    return product
-        .store()
+    const { id, title, price, imageSrc, imageAlt, description } = req.body;
+    if (!id) {
+        req.user
+            .createProduct({ title, price, imageSrc, imageAlt, description })
+            .then(() => res.redirect(ROUTES.ROOT))
+            .catch(({ message }) =>
+                res.render('error', {
+                    path: req.param,
+                    pageTitle: 'Error',
+                    pageHeader: 'Sorry, something went wrong.',
+                    message,
+                    user,
+                }),
+            );
+    }
+    return ProductModel.findByPk(+id)
+        .then((product) => {
+            product.title = title;
+            product.price = price;
+            product.imageSrc = imageSrc;
+            product.imageAlt = imageAlt;
+            product.description = description;
+            return product.save();
+        })
         .then(() => res.redirect(ROUTES.ROOT))
         .catch(({ message }) =>
             res.render('error', {
@@ -53,26 +64,36 @@ const handleProductNotFound = (req, res) => {
 };
 
 const getProducts = (req, res) => {
-    ProductModel.getAll().then((books) => {
-        return res.render('shop/products-list', {
-            path: req.path,
-            pageTitle: 'Books shop',
-            pageHeader: 'My Products',
-            products: books,
-            user,
-            actions: {
-                viewProduct: ROUTES.PRODUCTS.PRODUCT,
-                addToCart: ROUTES.CART.BASE,
-                editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
-                deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
-            },
-        });
-    });
+    ProductModel.findAll()
+        .then((books) => {
+            return res.render('shop/products-list', {
+                path: req.path,
+                pageTitle: 'Books shop',
+                pageHeader: 'My Products',
+                products: books,
+                user,
+                actions: {
+                    viewProduct: ROUTES.PRODUCTS.PRODUCT,
+                    addToCart: ROUTES.CART.BASE,
+                    editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
+                    deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
+                },
+            });
+        })
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.param,
+                pageTitle: 'Error',
+                pageHeader: 'Sorry, something went wrong.',
+                message,
+                user,
+            }),
+        );
 };
 
 const getProduct = (req, res) => {
     const { id } = req.params;
-    ProductModel.getProduct(id)
+    ProductModel.findByPk(+id)
         .then((product) => {
             if (product) {
                 return res.render('shop/product', {
@@ -107,18 +128,28 @@ const editProduct = (req, res) => {
     };
 
     if (user.isAdmin) {
-        return ProductModel.getProduct(id).then((product) => {
-            if (product) {
-                res.render('admin/product-form', {
-                    path: req.path,
-                    pageTitle: 'Edit product',
-                    pageHeader: `Edit ${product.title}`,
-                    submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
-                    product,
+        return ProductModel.findByPk(+id)
+            .then((product) => {
+                if (product) {
+                    res.render('admin/product-form', {
+                        path: req.path,
+                        pageTitle: 'Edit product',
+                        pageHeader: `Edit ${product.title}`,
+                        submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
+                        product,
+                        user,
+                    });
+                }
+            })
+            .catch(({ message }) =>
+                res.render('error', {
+                    path: req.param,
+                    pageTitle: 'Error',
+                    pageHeader: 'Sorry, something went wrong.',
+                    message,
                     user,
-                });
-            }
-        });
+                }),
+            );
     }
 
     return req.stats(401).redirect(ROUTES.PRODUCTS.BASE);
@@ -126,15 +157,14 @@ const editProduct = (req, res) => {
 
 const deleteProduct = (req, res) => {
     const { id } = req.body;
-    return ProductModel.delete(id)
+    return ProductModel.findByPk(+id)
         .then((product) => {
             if (product) {
-                return CartModel.deleteProduct(id, product.price).then(() => {
-                    return res.redirect(ROUTES.PRODUCTS.BASE);
-                });
+                return product.destroy();
             }
             throw new Error(`Can't find product with id ${id}`);
         })
+        .then(() => res.redirect(ROUTES.ROOT))
         .catch(({ message }) => {
             return res.render('error', {
                 path: req.param,

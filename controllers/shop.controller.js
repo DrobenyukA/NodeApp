@@ -1,15 +1,32 @@
+const ProductModel = require('../models/product.model');
+
 const user = {
     isAdmin: false,
 };
 
 const getIndex = (req, res) => {
-    res.render('shop/index', {
-        path: req.path,
-        pageTitle: 'Home page',
-        pageHeader: 'Home page',
-        products: [],
-        user,
-    });
+    ProductModel.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: 8,
+    })
+        .then((products) =>
+            res.render('shop/index', {
+                path: req.path,
+                pageTitle: 'Home page',
+                pageHeader: 'Home page',
+                products,
+                user,
+            }),
+        )
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.param,
+                pageTitle: 'Error',
+                pageHeader: 'Sorry, something went wrong.',
+                message,
+                user,
+            }),
+        );
 };
 
 const getCart = (req, res) => {
