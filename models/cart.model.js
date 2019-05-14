@@ -20,7 +20,7 @@ const Cart = sequelize.define('cart', {
 
 Cart.associate = (models) => {
     Cart.belongsTo(models.user, { constraints: true, onDelete: 'CASCADE' });
-    Cart.belongsToMany(models.product, { through: models.cartItem });
+    // Cart.belongsToMany(models.product, { through: models.cartItem });
 };
 
 module.exports = Cart;

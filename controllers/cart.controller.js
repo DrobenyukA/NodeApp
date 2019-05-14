@@ -1,13 +1,13 @@
 const ROUTES = require('../constants/routes');
 const CartModel = require('../models/cart.model');
 const ProductModel = require('../models/product.model');
-const ProductsController = require('../controllers/products.controller');
+const CartItem = require('../models/cartItem.model');
 
 const user = {
     isAdmin: false,
 };
 
-function getProductId({ productId }) {
+/* function getProductId({ productId }) {
     return productId;
 }
 
@@ -19,61 +19,63 @@ function mergeQuantityWithProduct(products) {
             quantity,
         };
     };
-}
+} */
 
 const getCart = (req, res) => {
-    CartModel.getCart()
-        .then((cart) =>
-            ProductModel.getProductsByIds(cart.products.map(getProductId)).then((products) => ({
-                products: cart.products.map(mergeQuantityWithProduct(products)),
-                totalPrice: cart.totalPrice,
-            })),
-        )
-        .then(({ products, totalPrice }) => {
+    req.user
+        .getCart()
+        .then((cart) => {
+            if (cart) {
+                return cart.getProducts();
+            }
+            throw new Error('There is no cat for this user');
+        })
+        .then((products) => {
             return res.render('shop/cart', {
                 path: req.path,
                 pageTitle: 'Cart',
                 pageHeader: 'My Products',
                 products,
-                totalPrice,
+                totalPrice: 100,
                 actions: {
                     deleteFromCart: ROUTES.CART.DELETE_ITEM,
                 },
                 user,
             });
         })
-        .catch(({ message }) => {
+        .catch(({ message }) =>
             res.render('error', {
                 path: req.path,
                 pageTitle: 'Cart',
                 pageHeader: 'Error on getting to cart',
                 message,
                 user,
-            });
-        });
+            }),
+        );
 };
 
 const addToCart = (req, res) => {
     const { productId, quantity } = req.body;
-
-    return ProductModel.getProduct(productId).then((product) => {
-        if (product) {
-            return CartModel.addToCart(productId, product.price, quantity)
-                .then(() => {
-                    res.redirect(ROUTES.PRODUCTS.BASE);
-                })
-                .catch(({ message }) => {
-                    res.render('error', {
-                        path: req.path,
-                        pageTitle: 'Cart',
-                        pageHeader: 'Error on adding to cart',
-                        message,
-                        user,
-                    });
-                });
-        }
-        return ProductsController.handleProductNotFound();
-    });
+    req.user
+        .getCart()
+        .then((cart) => {
+            if (cart) {
+                return cart.getProducts({ where: { id: productId } });
+            }
+            throw new Error('There is no cart for this user');
+        })
+        .then((products) => {
+            console.log({ products });
+        })
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.path,
+                pageTitle: 'Cart',
+                pageHeader: 'Error on adding to cart',
+                message,
+                user,
+            }),
+        );
 };
 
 const deleteItem = (req, res) => {
@@ -95,7 +97,6 @@ const deleteItem = (req, res) => {
                 user,
             }),
         );
-
 };
 
 module.exports = {

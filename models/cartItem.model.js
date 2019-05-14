@@ -1,6 +1,8 @@
 const Sequelize = require('sequelize');
 
 const sequelize = require('../utils/database');
+const Products = require('../models/product.model');
+const Cart = require('../models/cart.model');
 
 const CartItem = sequelize.define('cartItem', {
     id: {
@@ -22,8 +24,7 @@ const CartItem = sequelize.define('cartItem', {
     },
 });
 
-CartItem.associate = (models) => {
-    CartItem.belongsTo(models.cart, { constraints: true, onDelete: 'CASCADE' });
-};
+Products.belongsToMany(Cart, { through: CartItem });
+Cart.belongsToMany(Products, { through: CartItem });
 
 module.exports = CartItem;

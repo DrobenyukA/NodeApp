@@ -29,15 +29,6 @@ const getIndex = (req, res) => {
         );
 };
 
-const getCart = (req, res) => {
-    res.render('shop/cart', {
-        path: req.path,
-        pageTitle: 'Cart',
-        pageHeader: 'Cart',
-        user,
-    });
-};
-
 const getOrders = (req, res) => {
     res.render('shop/orders', {
         path: req.path,
@@ -58,7 +49,6 @@ const checkout = (req, res) => {
 
 module.exports = {
     getIndex,
-    getCart,
     getOrders,
     checkout,
 };

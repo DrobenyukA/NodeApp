@@ -20,7 +20,7 @@ const storeProduct = (req, res) => {
     // TODO: add book validation
     const { id, title, price, imageSrc, imageAlt, description } = req.body;
     if (!id) {
-        req.user
+        return req.user
             .createProduct({ title, price, imageSrc, imageAlt, description })
             .then(() => res.redirect(ROUTES.ROOT))
             .catch(({ message }) =>
