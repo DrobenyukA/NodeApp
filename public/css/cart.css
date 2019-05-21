@@ -1,0 +1,30 @@
+.cart__item-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin: auto;
+    width: 40rem;
+    max-width: 90%;
+  }
+  
+  .cart__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  }
+
+  .cart-product__title,
+  .cart-product__quantity{
+      width: calc(100% /3);
+  }
+  
+  .cart-product__title,
+  .cart-product__quantity {
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  

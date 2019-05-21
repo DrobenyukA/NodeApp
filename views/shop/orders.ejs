@@ -9,7 +9,22 @@
     <%- include('../includes/navigation.ejs') %>
     <main>
         <h1><%= pageHeader %></h1>
-        
+        <% if (orders.length) { %>
+            <ul>
+                <% orders.forEach(order => { %>
+                    <li>
+                        <p><strong># <%= order.id %></strong></p>
+                        <ul>
+                            <% order.products.forEach(product => { %>
+                                <li><%= product.title %> (<%= product.orderItem.quantity %>)</li>
+                            <% }); %>
+                        </ul>
+                    </li>
+                <% }); %>
+            </ul>
+            <% } else { %>
+                <h2 class="text-center">Nothing there!</h2>
+            <% } %>
     </main>
     <%- include('../includes/scripts.ejs') %>
 </body>

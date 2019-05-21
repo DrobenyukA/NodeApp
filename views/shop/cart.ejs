@@ -3,6 +3,7 @@
 
 <head>
     <%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/cart.css"/>
 </head>
 
 <body>
@@ -10,14 +11,20 @@
     <main>
         <h1><%= pageHeader %></h1>
         <ul>
-            <% products.forEach(({ title, quantity, ...product }) => { %>
-                <li>
-                    <p><%= title %> (<%= quantity %>)</p>
-                    <%- include('../includes/delete-from-cart.ejs', { product }) %>
+            <% products.forEach((product) => { %>
+                <li class="cart__item">
+                    <p class="cart-product__title">Title: <%= product.title %></p>
+                    <p class="cart-quantity">Quantity: (<%= product.cartItem.quantity %>)</p>
+                    <%- include('../includes/delete-from-cart.ejs', { productId: product.id, action: actions.deleteFromCart }) %>
                 </li>
             <% }) %>
         </ul>
         <p>Total price: <strong><%= totalPrice %></strong></p>
+        <hr />
+        <form action="<%= actions.orderNow %>" method="POST" class="text-center">
+            <button type="submit" class="btn">Order Now!</button>
+        </form>
+
     </main>
     <%- include('../includes/scripts.ejs') %>
 </body>

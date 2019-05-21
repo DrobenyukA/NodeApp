@@ -2,35 +2,29 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../utils/database');
 
-const Product = sequelize.define('product', {
+const User = sequelize.define('user', {
     id: {
         type: Sequelize.INTEGER(11),
         autoIncrement: true,
         allowNull: false,
         primaryKey: true,
     },
-    title: {
+    firstName: {
         type: Sequelize.STRING,
         allowNull: false,
     },
-    price: {
+    lastName: {
         type: Sequelize.DOUBLE,
         allowNull: false,
     },
-    imageSrc: {
+    email: {
         type: Sequelize.STRING,
         allowNull: false,
     },
-    imageAlt: Sequelize.STRING,
-    description: {
+    password: {
         type: Sequelize.STRING,
         allowNull: false,
     },
 });
 
-Product.associate = (models) => {
-    Product.belongsTo(models.user, { constraints: true, onDelete: 'CASCADE' });
-    // Product.belongsToMany(models.cart, { through: models.cartItem });
-};
-
-module.exports = Product;
+module.exports = User;
