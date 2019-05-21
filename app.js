@@ -9,6 +9,9 @@ const appRouter = require('./routes/index');
 const Product = require('./models/product.model');
 const User = require('./models/user.model');
 const Cart = require('./models/cart.model');
+const Order = require('./models/order.model');
+const CartItem = require('./models/cartItem.model');
+const OrderItem = require('./models/orderItem.model');
 const { withUser } = require('./middlewares/user.middleware');
 
 const app = express();
@@ -24,10 +27,10 @@ app.use(myLogger.logRequest);
 app.use(appRouter);
 
 User.hasMany(Product);
+User.hasMany(Order);
 User.hasOne(Cart);
 
 sequelize
-    // .sync({ force: true })
     .authenticate()
     .then(() => app.listen(port, () => myLogger.printPort(port)))
     .catch(({ message }) => myLogger.logError(`Unable to connect to the database: ${message}`));

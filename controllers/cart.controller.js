@@ -1,25 +1,9 @@
 const ROUTES = require('../constants/routes');
-const CartModel = require('../models/cart.model');
 const ProductModel = require('../models/product.model');
-const CartItem = require('../models/cartItem.model');
 
 const user = {
     isAdmin: false,
 };
-
-/* function getProductId({ productId }) {
-    return productId;
-}
-
-function mergeQuantityWithProduct(products) {
-    return ({ productId, quantity }) => {
-        const product = products.find(({ id }) => productId === id);
-        return {
-            ...product,
-            quantity,
-        };
-    };
-} */
 
 const getCart = (req, res) => {
     req.user
@@ -36,9 +20,11 @@ const getCart = (req, res) => {
                 pageTitle: 'Cart',
                 pageHeader: 'My Products',
                 products,
-                totalPrice: 100,
+                // TODO: calculate quantity from products
+                totalPrice: 101,
                 actions: {
                     deleteFromCart: ROUTES.CART.DELETE_ITEM,
+                    orderNow: ROUTES.ORDERS.BASE,
                 },
                 user,
             });
@@ -56,17 +42,28 @@ const getCart = (req, res) => {
 
 const addToCart = (req, res) => {
     const { productId, quantity } = req.body;
-    req.user
+    return req.user
         .getCart()
         .then((cart) => {
             if (cart) {
-                return cart.getProducts({ where: { id: productId } });
+                return cart.getProducts({ where: { id: productId } }).then((products) => [cart, products]);
             }
             throw new Error('There is no cart for this user');
         })
-        .then((products) => {
-            console.log({ products });
+        .then(([cart, products]) => {
+            if (products.length) {
+                return [cart, +quantity + products[0].cartItem.quantity];
+            }
+            return [cart, quantity];
         })
+        .then(([cart, newQuantity]) => ProductModel.findByPk(productId).then((product) => [cart, product, newQuantity]))
+        .then(([cart, product, itemQuantity]) => {
+            if (product) {
+                return cart.addProduct(product, { through: { quantity: itemQuantity } });
+            }
+            throw new Error(`There is no such product: ${productId}`);
+        })
+        .then(() => res.redirect(ROUTES.CART.BASE))
         .catch(({ message }) =>
             res.render('error', {
                 path: req.path,
@@ -80,13 +77,16 @@ const addToCart = (req, res) => {
 
 const deleteItem = (req, res) => {
     const { productId } = req.body;
-    return ProductModel.getProduct(productId)
-        .then((product) => {
-            if (product) {
-                return CartModel.deleteProduct(product.id, product.price);
+    return req.user
+        .getCart()
+        .then((cart) => cart.getProducts({ where: { id: productId } }))
+        .then((products) => {
+            if (products.length) {
+                return products[0];
             }
-            throw new Error(`Can't find product: ${productId}`);
+            throw new Error(`There is no such product: ${productId}`);
         })
+        .then((product) => product.cartItem.destroy())
         .then(() => res.redirect(ROUTES.CART.BASE))
         .catch(({ message }) =>
             res.render('error', {

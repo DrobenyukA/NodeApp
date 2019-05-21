@@ -144,3 +144,14 @@ form.btn-wrapper {
 .text-center{
   text-align: center;
 }
+
+.btn.danger {
+  color: red;
+  border-color: red;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
+  color: white;
+}

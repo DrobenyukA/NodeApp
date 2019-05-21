@@ -17,6 +17,7 @@ module.exports = {
     },
     ORDERS: {
         BASE: '/orders',
+        ORDER: '/orders/:id',
         CHECKOUT: '/checkout',
     },
 };
