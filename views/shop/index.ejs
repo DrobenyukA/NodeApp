@@ -11,7 +11,7 @@
         <h1><%= pageHeader %></h1>
         <% if (products.length) { %>
             <div class="grid">
-                <% products.forEach(({ title, price, description, image }) => { %>
+                <% products.forEach(({ id, title, price, description, image }) => { %>
                     <article class="card product-item">
                         <header class="card__header">
                             <h3 class="product__title"><%= title %></h3>
@@ -24,7 +24,12 @@
                             <p class="product__description"><%= description %></p>
                         </div>
                         <div class="card__actions">
-                            <button class="btn">Add to Cart</button>
+                            <% if (user.isAdmin) { %>
+                                <%- include('../includes/add-to-cart.ejs', { action: actions.addToCart, id }) %>
+                            <% } else { %>
+                                <%- include('../includes/delete-product.ejs', { action: actions.deleteProduct, id }) %>
+                                <%- include('../includes/edit-product.ejs', { action: actions.editProduct, id }) %>
+                            <% } %>
                         </div>
                     </article>
                 <% }) %>

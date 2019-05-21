@@ -5,6 +5,7 @@ const path = require('path');
 const settings = require('./constants/settings');
 const myLogger = require('./utils/logger');
 const appRouter = require('./routes/index');
+const db = require('./utils/database');
 
 const app = express();
 const port = process.env.port || 3000;
@@ -17,4 +18,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(myLogger.logRequest);
 app.use(appRouter);
 
-app.listen(port, () => myLogger.printPort(port));
+db.connect()
+    .then(() => {
+        app.listen(port, () => myLogger.printPort(port));
+    })
+    .catch(({ message }) => myLogger.logError(message));
+
+// TODO: add graceful shutdown

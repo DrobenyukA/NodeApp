@@ -1,4 +1,5 @@
 const fileStorage = require('../utils/fileStorage');
+const { getConnection } = require('../utils/database');
 const CartModel = require('./cart.model');
 
 class Product {
@@ -19,7 +20,8 @@ class Product {
         if (this.id) {
             return this.update();
         }
-        return fileStorage.storeItem('books', {
+        const db = getConnection();
+        return db.collection('products').insertOne({
             title: this.title,
             price: this.price,
             image: this.image,
@@ -44,7 +46,11 @@ class Product {
     }
 
     static getAll() {
-        return fileStorage.read('books');
+        const db = getConnection();
+        return db
+            .collection('products')
+            .find()
+            .toArray();
     }
 
     static getLatest() {

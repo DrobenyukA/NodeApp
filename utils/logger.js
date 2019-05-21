@@ -40,4 +40,5 @@ function logRequest({ method, path, params, query, body }, res, next) {
 module.exports = {
     logRequest,
     printPort,
+    logError: console.error,
 };
