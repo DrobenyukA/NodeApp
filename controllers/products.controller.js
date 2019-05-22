@@ -75,7 +75,7 @@ const getProduct = (req, res) => {
     ProductModel.getProduct(id)
         .then((product) => {
             if (product) {
-                return res.render('shop/product', {
+                return res.render('shop/product-details', {
                     path: req.path,
                     pageTitle: `Books shop | ${product.title}`,
                     pageHeader: `Product ${product.title}`,

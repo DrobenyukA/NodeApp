@@ -1,6 +1,6 @@
 const fileStorage = require('../utils/fileStorage');
-const { getConnection } = require('../utils/database');
-const CartModel = require('./cart.model');
+const { getConnection, ObjectId } = require('../utils/database');
+// const CartModel = require('./cart.model');
 
 class Product {
     constructor(product) {
@@ -33,14 +33,19 @@ class Product {
 
     update() {
         if (this.id) {
-            return fileStorage.read('books').then((books) => {
-                const index = books.findIndex((book) => book.id === this.id);
-                if (index) {
-                    books[index] = this.toObject();
-                    return fileStorage.write('books', books);
-                }
-                throw new Error(`There is no book with id:${this.id}`);
-            });
+            const db = getConnection();
+            return db.collection('products').updateOne(
+                { _id: ObjectId(this.id) },
+                {
+                    $set: {
+                        title: this.title,
+                        price: this.price,
+                        image: this.image,
+                        description: this.description,
+                        updated_at: new Date().toISOString(),
+                    },
+                },
+            );
         }
         return this.store();
     }
@@ -58,16 +63,17 @@ class Product {
     }
 
     static getProduct(id) {
-        return fileStorage.read('books').then((books) => books.find((book) => book.id === id));
+        const db = getConnection();
+        return db
+            .collection('products')
+            .find({ _id: ObjectId(id) })
+            .next();
+        // return fileStorage.read('books').then((books) => books.find((book) => book.id === id));
     }
 
     static delete(id) {
-        return fileStorage.read('books').then((books) =>
-            fileStorage
-                .write('books', books.filter((book) => book.id !== id))
-                .then(() => books.find((book) => book.id === id))
-                .then(({ id, price }) => CartModel.deleteProduct(id, price)),
-        );
+        const db = getConnection();
+        return db.collection('products').deleteOne({ _id: ObjectId(id) });
     }
 
     static getProductsByIds(ids) {

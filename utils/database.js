@@ -25,4 +25,5 @@ const getConnection = () => {
 module.exports = {
     connect,
     getConnection,
+    ObjectId: mongodb.ObjectId,
 };

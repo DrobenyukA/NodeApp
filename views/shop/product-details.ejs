@@ -15,7 +15,7 @@
         </div>
         <h2><%= product.price %></h2>
         <p><%= product.description %></p>
-        <%- include('../includes/add-to-cart.ejs') %>
+        <%- include('../includes/add-to-cart.ejs', { action: actions.addToCard, id: product._id }) %>
         </main>
     <%- include('../includes/scripts.ejs') %>
 </body>

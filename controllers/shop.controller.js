@@ -16,6 +16,7 @@ const getIndex = (req, res) => {
                 user,
                 actions: {
                     addToCart: ROUTES.CART.BASE,
+                    viewProduct: ROUTES.PRODUCTS.PRODUCT,
                     editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
                     deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
                 },
