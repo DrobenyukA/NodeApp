@@ -6,6 +6,7 @@ const settings = require('./constants/settings');
 const myLogger = require('./utils/logger');
 const appRouter = require('./routes/index');
 const db = require('./utils/database');
+const withUser = require('./middlewares/withUser');
 
 const app = express();
 const port = process.env.port || 3000;
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(myLogger.logRequest);
+app.use(withUser);
 app.use(appRouter);
 
 db.connect()

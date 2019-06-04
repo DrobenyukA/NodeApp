@@ -4,16 +4,17 @@ const { getConnection, ObjectId } = require('../utils/database');
 
 class Product {
     constructor(product) {
-        this.id = product.id;
+        this.id = product._id;
         this.title = product.title || '';
-        this.price = product.price || 0;
+        this.price = parseFloat(product.price) || 0;
         this.image = product.image || {
             src: 'https://images-na.ssl-images-amazon.com/images/I/41LBzpPXCOL._SX379_BO1,204,203,200_.jpg',
             alt: 'Refactoring: Improving the Design of Existing Code',
         };
         this.description = product.description || '';
-        this.created_at = new Date().toISOString();
-        this.updated_at = undefined;
+        this.userId = product.userId;
+        this.createdAt = new Date().toISOString();
+        this.updatedAt = product.updatedAt;
     }
 
     store() {
@@ -23,11 +24,12 @@ class Product {
         const db = getConnection();
         return db.collection('products').insertOne({
             title: this.title,
-            price: this.price,
+            price: parseFloat(this.price),
             image: this.image,
+            userId: this.userId,
             description: this.description,
-            created_at: this.created_at,
-            updated_at: this.updated_at,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
         });
     }
 
@@ -39,7 +41,7 @@ class Product {
                 {
                     $set: {
                         title: this.title,
-                        price: this.price,
+                        price: parseFloat(this.price),
                         image: this.image,
                         description: this.description,
                         updated_at: new Date().toISOString(),
@@ -78,18 +80,6 @@ class Product {
 
     static getProductsByIds(ids) {
         return fileStorage.read('books').then((books) => books.filter((book) => !!ids.find((id) => id === book.id)));
-    }
-
-    toObject() {
-        return {
-            id: this.id,
-            title: this.title,
-            price: this.price,
-            image: this.image,
-            description: this.description,
-            created_at: this.created_at,
-            updated_at: new Date().toISOString(),
-        };
     }
 }
 

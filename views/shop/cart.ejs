@@ -3,21 +3,25 @@
 
 <head>
     <%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/cart.css"/>
 </head>
 
 <body>
     <%- include('../includes/navigation.ejs') %>
     <main>
         <h1><%= pageHeader %></h1>
-        <ul>
-            <% products.forEach(({ title, quantity, ...product }) => { %>
-                <li>
+        <ul class="cart__item-list">
+            <% products.forEach(({ title, quantity, _id }) => { %>
+                <li class="cart__item">
                     <p><%= title %> (<%= quantity %>)</p>
-                    <%- include('../includes/delete-from-cart.ejs', { product }) %>
+                    <%- include('../includes/delete-from-cart.ejs', { id: _id, action: actions.deleteFromCart }) %>
                 </li>
             <% }) %>
         </ul>
         <p>Total price: <strong><%= totalPrice %></strong></p>
+        <div class="centered">
+            <%- include('../includes/order-now.ejs', { action: actions.orderNow }) %>
+        </div>
     </main>
     <%- include('../includes/scripts.ejs') %>
 </body>

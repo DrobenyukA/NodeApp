@@ -43,12 +43,26 @@ const getCart = (req, res) => {
 };
 
 const getOrders = (req, res) => {
-    res.render('shop/orders', {
-        path: req.path,
-        pageTitle: 'Orders',
-        pageHeader: 'Orders',
-        user,
-    });
+    req.user
+        .getOrders()
+        .then((orders) => {
+            return res.render('shop/orders', {
+                path: req.path,
+                pageTitle: 'Orders',
+                pageHeader: 'Orders',
+                orders,
+                user,
+            });
+        })
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.param,
+                pageTitle: 'Error',
+                pageHeader: 'Sorry, something went wrong.',
+                message,
+                user,
+            }),
+        );
 };
 
 const checkout = (req, res) => {
@@ -60,9 +74,25 @@ const checkout = (req, res) => {
     });
 };
 
+const createOrder = (req, res) => {
+    return req.user
+        .addOrder()
+        .then(() => res.redirect(ROUTES.ORDERS.BASE))
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.param,
+                pageTitle: 'Error',
+                pageHeader: 'Sorry, something went wrong.',
+                message,
+                user,
+            }),
+        );
+};
+
 module.exports = {
     getIndex,
     getCart,
     getOrders,
     checkout,
+    createOrder,
 };

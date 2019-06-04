@@ -1,6 +1,5 @@
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product.model');
-const CartModel = require('../models/cart.model');
 
 const user = {
     isAdmin: true,
@@ -28,6 +27,7 @@ const storeProduct = (req, res) => {
             alt: req.body.imageAlt,
         },
         description: req.body.description,
+        userId: req.user.id,
     });
     return product
         .store()
@@ -127,14 +127,7 @@ const editProduct = (req, res) => {
 const deleteProduct = (req, res) => {
     const { id } = req.body;
     return ProductModel.delete(id)
-        .then((product) => {
-            if (product) {
-                return CartModel.deleteProduct(id, product.price).then(() => {
-                    return res.redirect(ROUTES.PRODUCTS.BASE);
-                });
-            }
-            throw new Error(`Can't find product with id ${id}`);
-        })
+        .then(() => req.user.deleteFromCart(id, Infinity).then(() => res.redirect(ROUTES.PRODUCTS.BASE)))
         .catch(({ message }) => {
             return res.render('error', {
                 path: req.param,

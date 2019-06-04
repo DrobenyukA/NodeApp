@@ -122,6 +122,17 @@ a.btn {
   text-decoration: none;
 }
 
+.btn.danger {
+  color: red;
+  border-color: red;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
+  color: white;
+}
+
 form.btn-wrapper {
   display: inline-block;
 }

@@ -1,5 +1,4 @@
 const ROUTES = require('../constants/routes');
-const CartModel = require('../models/cart.model');
 const ProductModel = require('../models/product.model');
 const ProductsController = require('../controllers/products.controller');
 
@@ -7,28 +6,9 @@ const user = {
     isAdmin: false,
 };
 
-function getProductId({ productId }) {
-    return productId;
-}
-
-function mergeQuantityWithProduct(products) {
-    return ({ productId, quantity }) => {
-        const product = products.find(({ id }) => productId === id);
-        return {
-            ...product,
-            quantity,
-        };
-    };
-}
-
 const getCart = (req, res) => {
-    CartModel.getCart()
-        .then((cart) =>
-            ProductModel.getProductsByIds(cart.products.map(getProductId)).then((products) => ({
-                products: cart.products.map(mergeQuantityWithProduct(products)),
-                totalPrice: cart.totalPrice,
-            })),
-        )
+    req.user
+        .getCart()
         .then(({ products, totalPrice }) => {
             return res.render('shop/cart', {
                 path: req.path,
@@ -38,6 +18,7 @@ const getCart = (req, res) => {
                 totalPrice,
                 actions: {
                     deleteFromCart: ROUTES.CART.DELETE_ITEM,
+                    orderNow: ROUTES.ORDERS.BASE,
                 },
                 user,
             });
@@ -58,7 +39,8 @@ const addToCart = (req, res) => {
 
     return ProductModel.getProduct(productId).then((product) => {
         if (product) {
-            return CartModel.addToCart(productId, product.price, quantity)
+            return req.user
+                .addToCart(new ProductModel(product), +quantity)
                 .then(() => {
                     res.redirect(ROUTES.PRODUCTS.BASE);
                 })
@@ -77,14 +59,9 @@ const addToCart = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-    const { productId } = req.body;
-    return ProductModel.getProduct(productId)
-        .then((product) => {
-            if (product) {
-                return CartModel.deleteProduct(product.id, product.price);
-            }
-            throw new Error(`Can't find product: ${productId}`);
-        })
+    const { productId, quantity } = req.body;
+    return req.user
+        .deleteFromCart(productId, quantity)
         .then(() => res.redirect(ROUTES.CART.BASE))
         .catch(({ message }) =>
             res.render('error', {
@@ -95,7 +72,6 @@ const deleteItem = (req, res) => {
                 user,
             }),
         );
-
 };
 
 module.exports = {
