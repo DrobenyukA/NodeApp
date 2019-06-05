@@ -37,13 +37,11 @@ const getCart = (req, res) => {
 const addToCart = (req, res) => {
     const { productId, quantity } = req.body;
 
-    return ProductModel.getProduct(productId).then((product) => {
+    return ProductModel.findById(productId).then((product) => {
         if (product) {
             return req.user
-                .addToCart(new ProductModel(product), +quantity)
-                .then(() => {
-                    res.redirect(ROUTES.PRODUCTS.BASE);
-                })
+                .addToCart(product, +quantity)
+                .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
                 .catch(({ message }) => {
                     res.render('error', {
                         path: req.path,

@@ -1,134 +1,143 @@
-const { getConnection, ObjectId } = require('../utils/database');
+const mongoose = require('mongoose');
 
-class User {
-    constructor({ _id, name, email, isAdmin, cart, createdAt }) {
-        this.id = _id;
-        this.name = name;
-        this.email = email;
-        this.cart = cart || { items: [] };
-        this.createdAt = createdAt || new Date().toISOString();
-        this.isAdmin = isAdmin || false;
-    }
+const { USER, PRODUCT } = require('../constants/models');
+const { ObjectId } = mongoose.Schema.Types;
 
-    store() {
-        if (this.id) {
-            return this.update();
-        }
-        const db = getConnection();
-        return db.collection('users').insertOne({
-            name: this.name,
-            email: this.email,
-            cart: this.cart,
-            isAdmin: false,
-            createdAt: this.createdAt,
+const schema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        validate: {
+            // eslint-disable-next-line
+            validator: (v) => /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v),
+            message: (props) => `${props.value} is not a valid phone number!`,
+        },
+    },
+    cart: {
+        items: [
+            {
+                product: {
+                    type: ObjectId,
+                    required: true,
+                    ref: PRODUCT,
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                },
+            },
+        ],
+    },
+    isAdmin: Boolean,
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    updatedAt: Date,
+});
+
+schema.methods.addToCart = function(product, quantity = 1) {
+    const cartProduct = this.cart.items.findIndex((item) => product.id.toString() === item.product.toString());
+    if (cartProduct >= 0) {
+        this.cart.items[cartProduct].quantity += quantity;
+    } else {
+        this.cart.items.push({
+            product: product._id,
+            quantity,
         });
     }
+    return this.save();
+};
 
-    update() {
-        if (this.id) {
-            const db = getConnection();
-            return db.collection('users').updateOne(
-                { _id: ObjectId(this.id) },
-                {
-                    $set: {
-                        name: this.name,
-                        email: this.email,
-                        cart: this.cart,
-                        updated_at: new Date().toISOString(),
-                    },
+schema.methods.getCart = function() {
+    return this.populate('cart.items.product', 'title price _id')
+        .execPopulate()
+        .then(({ cart }) =>
+            cart.items.reduce(
+                (result, { product, quantity }) => {
+                    result.products.push({ ...product.toObject(), quantity });
+                    result.totalPrice += quantity * product.price;
+                    return result;
                 },
-            );
-        }
-        return this.store();
-    }
+                { products: [], totalPrice: 0 },
+            ),
+        );
+};
 
-    addToCart(product, quantity = 1) {
-        const cartProduct = this.cart.items.findIndex((item) => product.id.toString() === item.productId.toString());
-        if (cartProduct >= 0) {
-            this.cart.items[cartProduct].quantity += quantity;
-        } else {
-            this.cart.items.push({
-                productId: product.id,
-                quantity,
-            });
-        }
-        return this.store();
+schema.methods.deleteFromCart = function(id, quantity = 1) {
+    const index = this.cart.items.findIndex(({ product }) => id.toString() === product.toString());
+    if (this.cart.items[index].quantity <= quantity) {
+        this.cart.items = this.cart.items.filter((item, position) => position !== index);
+    } else {
+        this.cart.items[index].quantity -= parseInt(quantity);
     }
+    return this.save();
+};
 
-    getCart() {
-        const db = getConnection();
-        const productIds = this.cart.items.map(({ productId }) => ObjectId(productId));
-        return db
-            .collection('products')
-            .find({
-                _id: {
-                    $in: productIds,
-                },
-            })
-            .toArray()
-            .then((products) => {
-                return products.reduce(
-                    (cart, product) => {
-                        const cartItem = this.cart.items.find(
-                            ({ productId }) => product._id.toString() === productId.toString(),
-                        );
-                        cart.products.push({
-                            ...product,
-                            quantity: +cartItem.quantity,
-                        });
-                        cart.totalPrice += parseFloat(product.price) * cartItem.quantity;
-                        return cart;
-                    },
-                    { products: [], totalPrice: 0 },
-                );
-            });
-    }
-    set isAdmin(val) {}
+const model = mongoose.model(USER, schema);
 
-    static findById(id) {
-        const db = getConnection();
-        return db.collection('users').findOne({ _id: ObjectId(id) });
-    }
+// const { getConnection, ObjectId } = require('../utils/database');
 
-    deleteFromCart(id, quantity = 1) {
-        const index = this.cart.items.findIndex(({ productId }) => id.toString() === productId.toString());
-        if (this.cart.items[index].quantity <= quantity) {
-            this.cart.items = this.cart.items.filter((item, position) => position !== index);
-        } else {
-            this.cart.items[index].quantity -= parseInt(quantity);
-        }
-        return this.update();
-    }
+// class User {
+//     constructor({ _id, name, email, isAdmin, cart, createdAt }) {
+//         this.id = _id;
+//         this.name = name;
+//         this.email = email;
+//         this.cart = cart || { items: [] };
+//         this.createdAt = createdAt || new Date().toISOString();
+//         this.isAdmin = isAdmin || false;
+//     }
 
-    addOrder() {
-        const db = getConnection();
-        if (this.cart.items.length) {
-            return this.getCart().then((cart) =>
-                db
-                    .collection('orders')
-                    .insertOne({
-                        userId: this.id,
-                        items: cart.products,
-                        status: 'pending',
-                        createdAt: new Date().toISOString(),
-                        updatedAt: null,
-                    })
-                    .then(() => {
-                        this.cart.items = [];
-                        return this.update();
-                    }),
-            );
-        }
-        return Promise.resolve();
-    }
+//     store() {
+//         if (this.id) {
+//             return this.update();
+//         }
+//         const db = getConnection();
+//         return db.collection('users').insertOne({
+//             name: this.name,
+//             email: this.email,
+//             cart: this.cart,
+//             isAdmin: false,
+//             createdAt: this.createdAt,
+//         });
+//     }
 
-    getOrders() {
-        const db = getConnection();
-        return db
-            .collection('orders')
-            .find({ userId: this.id })
-            .toArray();
-    }
-}
+//     update() {
+//         if (this.id) {
+//             const db = getConnection();
+//             return db.collection('users').updateOne(
+//                 { _id: ObjectId(this.id) },
+//                 {
+//                     $set: {
+//                         name: this.name,
+//                         email: this.email,
+//                         cart: this.cart,
+//                         updated_at: new Date().toISOString(),
+//                     },
+//                 },
+//             );
+//         }
+//         return this.store();
+//     }
 
-module.exports = User;
+//     set isAdmin(val) {}
+
+//     static findById(id) {
+//         const db = getConnection();
+//         return db.collection('users').findOne({ _id: ObjectId(id) });
+//     }
+
+//     getOrders() {
+//         const db = getConnection();
+//         return db
+//             .collection('orders')
+//             .find({ userId: this.id })
+//             .toArray();
+//     }
+// }
+
+module.exports = model;

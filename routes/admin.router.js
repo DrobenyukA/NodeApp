@@ -9,7 +9,7 @@ router.get(ROUTES.ADMIN.CREATE_PRODUCT, ProductsController.createProduct);
 
 router.post(ROUTES.ADMIN.CREATE_PRODUCT, ProductsController.storeProduct);
 
-router.post(ROUTES.ADMIN.UPDATE_PRODUCT, ProductsController.storeProduct);
+router.post(ROUTES.ADMIN.UPDATE_PRODUCT, ProductsController.updateProduct);
 
 router.post(ROUTES.ADMIN.DELETE_PRODUCT, ProductsController.deleteProduct);
 

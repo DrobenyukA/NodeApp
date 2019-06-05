@@ -2,9 +2,9 @@ const UserModel = require('../models/user.model');
 const logger = require('../utils/logger');
 
 const withUser = (req, res, next) => {
-    UserModel.findById('5ced5d0f1c9d4400001dbcb3')
+    UserModel.findById('5cf7e07cb4ea248872a3791b')
         .then((user) => {
-            req.user = new UserModel(user);
+            req.user = user;
             next();
         })
         .catch((error) => {

@@ -17,20 +17,21 @@ const createProduct = (req, res) => {
 };
 
 const storeProduct = (req, res) => {
+    const { title, price, description, imageSrc: src, imageAlt: alt } = req.body;
+    const { _id: userId } = req.user || { _id: undefined };
     // TODO: add book validation
     const product = new ProductModel({
-        id: req.body.id,
-        title: req.body.title,
-        price: req.body.price,
+        title,
+        price,
         image: {
-            src: req.body.imageSrc,
-            alt: req.body.imageAlt,
+            src: src || 'https://cdn1.iconfinder.com/data/icons/notes-filled-line/64/note-text-empty-book-512.png',
+            alt,
         },
-        description: req.body.description,
-        userId: req.user.id,
+        description,
+        userId,
     });
     return product
-        .store()
+        .save()
         .then(() => res.redirect(ROUTES.ROOT))
         .catch(({ message }) =>
             res.render('error', {
@@ -43,6 +44,25 @@ const storeProduct = (req, res) => {
         );
 };
 
+const updateProduct = (req, res) => {
+    const { id: productId, title, price, description, imageSrc: src, imageAlt: alt } = req.body;
+    if (productId) {
+        return ProductModel.findById(productId)
+            .then((product) => {
+                product.title = title;
+                product.price = price;
+                product.description = description;
+                product.image.src = src;
+                product.image.alt = alt;
+                product.updatedAt = new Date().toISOString();
+                return product.save();
+            })
+            .then(() => res.redirect(ROUTES.ROOT))
+            .catch();
+    }
+    return handleProductNotFound(req, res);
+};
+
 const handleProductNotFound = (req, res) => {
     res.status(404).render('404', {
         path: req.path,
@@ -53,26 +73,37 @@ const handleProductNotFound = (req, res) => {
 };
 
 const getProducts = (req, res) => {
-    ProductModel.getAll().then((books) => {
-        return res.render('shop/products-list', {
-            path: req.path,
-            pageTitle: 'Books shop',
-            pageHeader: 'My Products',
-            products: books,
-            user,
-            actions: {
-                viewProduct: ROUTES.PRODUCTS.PRODUCT,
-                addToCart: ROUTES.CART.BASE,
-                editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
-                deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
-            },
-        });
-    });
+    ProductModel.find()
+        // .select('name price, description, -image.src')
+        .then((products) =>
+            res.render('shop/products-list', {
+                path: req.path,
+                pageTitle: 'Books shop',
+                pageHeader: 'My Products',
+                products,
+                user,
+                actions: {
+                    viewProduct: ROUTES.PRODUCTS.PRODUCT,
+                    addToCart: ROUTES.CART.BASE,
+                    editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
+                    deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
+                },
+            }),
+        )
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.param,
+                pageTitle: 'Error',
+                pageHeader: 'Sorry, something went wrong.',
+                message,
+                user,
+            }),
+        );
 };
 
 const getProduct = (req, res) => {
     const { id } = req.params;
-    ProductModel.getProduct(id)
+    ProductModel.findById(id)
         .then((product) => {
             if (product) {
                 return res.render('shop/product-details', {
@@ -107,18 +138,28 @@ const editProduct = (req, res) => {
     };
 
     if (user.isAdmin) {
-        return ProductModel.getProduct(id).then((product) => {
-            if (product) {
-                res.render('admin/product-form', {
-                    path: req.path,
-                    pageTitle: 'Edit product',
-                    pageHeader: `Edit ${product.title}`,
-                    submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
-                    product,
+        return ProductModel.findById(id)
+            .then((product) => {
+                if (product) {
+                    res.render('admin/product-form', {
+                        path: req.path,
+                        pageTitle: 'Edit product',
+                        pageHeader: `Edit ${product.title}`,
+                        submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
+                        product,
+                        user,
+                    });
+                }
+            })
+            .catch(({ message }) =>
+                res.render('error', {
+                    path: req.param,
+                    pageTitle: 'Error',
+                    pageHeader: 'Sorry, something went wrong.',
+                    message,
                     user,
-                });
-            }
-        });
+                }),
+            );
     }
 
     return req.stats(401).redirect(ROUTES.PRODUCTS.BASE);
@@ -126,8 +167,8 @@ const editProduct = (req, res) => {
 
 const deleteProduct = (req, res) => {
     const { id } = req.body;
-    return ProductModel.delete(id)
-        .then(() => req.user.deleteFromCart(id, Infinity).then(() => res.redirect(ROUTES.PRODUCTS.BASE)))
+    return ProductModel.findByIdAndDelete(id) // .then(() => req.user.deleteFromCart(id, Infinity))
+        .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
         .catch(({ message }) => {
             return res.render('error', {
                 path: req.param,
@@ -146,5 +187,6 @@ module.exports = {
     getProducts,
     handleProductNotFound,
     storeProduct,
+    updateProduct,
     getProduct,
 };

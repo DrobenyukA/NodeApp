@@ -1,4 +1,5 @@
 const ProductModel = require('../models/product.model');
+const OrderModel = require('../models/order.model');
 const ROUTES = require('../constants/routes');
 
 const user = {
@@ -6,7 +7,7 @@ const user = {
 };
 
 const getIndex = (req, res) => {
-    ProductModel.getAll()
+    ProductModel.find()
         .then((products) => {
             res.render('shop/index', {
                 path: req.path,
@@ -43,8 +44,7 @@ const getCart = (req, res) => {
 };
 
 const getOrders = (req, res) => {
-    req.user
-        .getOrders()
+    OrderModel.find()
         .then((orders) => {
             return res.render('shop/orders', {
                 path: req.path,
@@ -76,7 +76,24 @@ const checkout = (req, res) => {
 
 const createOrder = (req, res) => {
     return req.user
-        .addOrder()
+        .getCart()
+        .then(({ products }) => {
+            req.user.cart.items = [];
+            return req.user.save().then(() => products);
+        })
+        .then((products) => {
+            console.log({ products });
+            const order = new OrderModel({
+                user: req.user._id,
+                productsData: products.map(({ title, price, _id: origin, quantity }) => ({
+                    title,
+                    price,
+                    quantity,
+                    origin,
+                })),
+            });
+            return order.save();
+        })
         .then(() => res.redirect(ROUTES.ORDERS.BASE))
         .catch(({ message }) =>
             res.render('error', {
