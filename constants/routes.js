@@ -19,4 +19,9 @@ module.exports = {
         BASE: '/orders',
         CHECKOUT: '/checkout',
     },
+    AUTH: {
+        BASE: '/auth',
+        LOGIN: '/auth/login',
+        LOGOUT: '/auth/logout',
+    },
 };

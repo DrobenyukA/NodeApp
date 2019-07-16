@@ -24,20 +24,18 @@
                             <p class="product__description"><%= product.description %></p>
                         </div>
                         <div class="card__actions">
-                            <% if (user && user.isAdmin) { %>
-                                <a href="<%= actions.editProduct.replace(':id', product.id) %>" class="btn" type="submit">
-                                    Edit
-                                </a>
-                                <form method="POST" action="<%= `${actions.deleteProduct}` %>" class="btn-wrapper">
-                                    <input type="hidden" name="id" value="<%= product.id %>"/>
-                                    <button class="btn" type="submit">Delete</button>
-                                </form>
-                            <% } else { %>
-                                <a href="<%= actions.viewProduct.replace(':id', product.id) %>" class="btn" type="submit">
-                                    Details
-                                </a>
-                                <%- include('../includes/add-to-cart.ejs', { product }) %>
+                            <% if (user) { %>
+                                <%- include('../includes/add-to-cart.ejs', { action: actions.addToCart, id: product._id }) %>
+                                <% if (user.isAdmin) { %>
+                                    <a href="<%= actions.editProduct.replace(':id', product._id) %>" class="btn" type="submit">
+                                        Edit
+                                    </a>
+                                    <%- include('../includes/delete-product.ejs', { action: actions.deleteProduct, id: product._id }) %>
+                                <% } %>
                             <% } %>
+                            <a href="<%= actions.viewProduct.replace(':id', product._id) %>" class="btn" type="submit">
+                                Details
+                            </a>
                         </div>                       
                     </article>
                 <% }) %>

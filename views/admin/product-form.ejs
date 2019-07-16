@@ -15,8 +15,8 @@
         <h1><%= pageHeader %></h1>
 
         <form class="product-form" action="<%= submitHandlerPath %>" method="POST">
-            <% if (product.id) { %>
-                <input type="hidden" name="id" value="<%= product.id %>"/>
+            <% if (product._id) { %>
+                <input type="hidden" name="id" value="<%= product._id %>"/>
             <% } %>
             <div class="form-control">
                 <label for="title">Title</label>
@@ -40,7 +40,7 @@
             </div>
 
             <button type="submit" class="btn">
-                <% if (product.id) { %>
+                <% if (product._id) { %>
                     Update Product
                 <% } else { %>
                     Add Product
