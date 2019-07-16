@@ -24,15 +24,16 @@
                             <p class="product__description"><%= description %></p>
                         </div>
                         <div class="card__actions">
-                            <% if (user && user.isAdmin) { %>
-                                <%- include('../includes/delete-product.ejs', { action: actions.deleteProduct, id }) %>
-                                <%- include('../includes/edit-product.ejs', { action: actions.editProduct, id }) %>
-                            <% } else { %>
+                            <% if (user) { %>
                                 <%- include('../includes/add-to-cart.ejs', { action: actions.addToCart, id }) %>
-                                <a href="<%= actions.viewProduct.replace(':id', id) %>" class="btn" type="submit">
-                                    Details
-                                </a>
+                                <% if (user.isAdmin) { %>
+                                    <%- include('../includes/delete-product.ejs', { action: actions.deleteProduct, id }) %>
+                                    <%- include('../includes/edit-product.ejs', { action: actions.editProduct, id }) %>
+                                <% } %>
                             <% } %>
+                            <a href="<%= actions.viewProduct.replace(':id', id) %>" class="btn" type="submit">
+                                Details
+                            </a>
                         </div>
                     </article>
                 <% }) %>

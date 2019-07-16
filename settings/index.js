@@ -13,4 +13,7 @@ module.exports = {
         user: process.env.DB_USER,
         name: process.env.DB_NAME,
     },
+    session: {
+        secret: process.env.SESSION_SECRET,
+    },
 };

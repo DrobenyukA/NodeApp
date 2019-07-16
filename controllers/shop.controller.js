@@ -2,11 +2,7 @@ const ProductModel = require('../models/product.model');
 const OrderModel = require('../models/order.model');
 const ROUTES = require('../constants/routes');
 
-const user = {
-    isAdmin: false,
-};
-
-const getIndex = (req, res) => {
+const getIndex = ({ user, ...req }, res) => {
     ProductModel.find()
         .then((products) => {
             res.render('shop/index', {
@@ -34,7 +30,7 @@ const getIndex = (req, res) => {
         );
 };
 
-const getCart = (req, res) => {
+const getCart = ({ user, ...req }, res) => {
     res.render('shop/cart', {
         path: req.path,
         pageTitle: 'Cart',
@@ -43,7 +39,7 @@ const getCart = (req, res) => {
     });
 };
 
-const getOrders = (req, res) => {
+const getOrders = ({ user, ...req }, res) => {
     OrderModel.find()
         .then((orders) => {
             return res.render('shop/orders', {
@@ -65,7 +61,7 @@ const getOrders = (req, res) => {
         );
 };
 
-const checkout = (req, res) => {
+const checkout = ({ user, ...req }, res) => {
     res.render('shop/checkout', {
         path: req.path,
         pageTitle: 'Checkout',
@@ -74,15 +70,17 @@ const checkout = (req, res) => {
     });
 };
 
-const createOrder = (req, res) => {
-    return req.user
+const createOrder = ({ user, ...req }, res) => {
+    if (!user) {
+        return res.redirect(ROUTES.AUTH.LOGIN);
+    }
+    return user
         .getCart()
         .then(({ products }) => {
             req.user.cart.items = [];
             return req.user.save().then(() => products);
         })
         .then((products) => {
-            console.log({ products });
             const order = new OrderModel({
                 user: req.user._id,
                 productsData: products.map(({ title, price, _id: origin, quantity }) => ({

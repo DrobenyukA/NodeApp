@@ -3,6 +3,7 @@ const handlePageNotFound = (req, res) => {
         path: req.path,
         pageTitle: 'Page not found.',
         pageHeader: 'Page not found.',
+        user: req.user,
     });
 };
 
