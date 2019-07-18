@@ -6,14 +6,16 @@ const ShopController = require('../controllers/shop.controller');
 
 const router = express.Router();
 
+const forUser = require('../middlewares/forUser');
+
 router.get(ROUTES.ROOT, ShopController.getIndex);
 
 router.get(ROUTES.PRODUCTS.PRODUCT, ProductsController.getProduct);
 
 router.get(ROUTES.PRODUCTS.BASE, ProductsController.getProducts);
 
-router.get(ROUTES.ORDERS.BASE, ShopController.getOrders);
+router.get(ROUTES.ORDERS.BASE, forUser, ShopController.getOrders);
 
-router.post(ROUTES.ORDERS.BASE, ShopController.createOrder);
+router.post(ROUTES.ORDERS.BASE, forUser, ShopController.createOrder);
 
 module.exports = router;

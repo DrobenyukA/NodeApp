@@ -77,12 +77,12 @@ const createOrder = ({ user, ...req }, res) => {
     return user
         .getCart()
         .then(({ products }) => {
-            req.user.cart.items = [];
-            return req.user.save().then(() => products);
+            user.cart.items = [];
+            return user.save().then(() => products);
         })
         .then((products) => {
             const order = new OrderModel({
-                user: req.user._id,
+                user: user._id,
                 productsData: products.map(({ title, price, _id: origin, quantity }) => ({
                     title,
                     price,

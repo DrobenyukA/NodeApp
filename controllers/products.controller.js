@@ -1,24 +1,17 @@
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product.model');
 
-const createProduct = ({ user, ...req }, res) => {
-    if (user) {
-        return res.render('admin/product-form', {
-            path: req.path,
-            pageTitle: 'Add product',
-            pageHeader: 'Add product',
-            submitHandlerPath: ROUTES.ADMIN.ADD_PRODUCT,
-            product: {},
-            user,
-        });
-    }
-    return res.redirect(ROUTES.AUTH.LOGIN);
-};
+const createProduct = ({ user, ...req }, res) =>
+    res.render('admin/product-form', {
+        path: req.path,
+        pageTitle: 'Add product',
+        pageHeader: 'Add product',
+        submitHandlerPath: ROUTES.ADMIN.ADD_PRODUCT,
+        product: {},
+        user,
+    });
 
 const storeProduct = ({ user, body, param }, res) => {
-    if (!user) {
-        return res.redirect(ROUTES.AUTH.LOGIN);
-    }
     const { title, price, description, imageSrc: src, imageAlt: alt } = body;
     const { _id: userId } = user || { _id: undefined };
     // TODO: add book validation
@@ -76,7 +69,6 @@ const handleProductNotFound = ({ user, path }, res) => {
 
 const getProducts = ({ user, path, param }, res) => {
     ProductModel.find()
-        // .select('name price, description, -image.src')
         .then((products) =>
             res.render('shop/products-list', {
                 path: path,
@@ -134,46 +126,34 @@ const getProduct = ({ user, ...req }, res) => {
 };
 
 const editProduct = ({ user, ...req }, res) => {
-    if (!user) {
-        return res.redirect(ROUTES.AUTH.LOGIN);
-    }
     const { id } = req.params;
-
-    if (user.isAdmin) {
-        return ProductModel.findById(id)
-            .then((product) => {
-                if (product) {
-                    res.render('admin/product-form', {
-                        path: req.path,
-                        pageTitle: 'Edit product',
-                        pageHeader: `Edit ${product.title}`,
-                        submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
-                        product,
-                        user,
-                    });
-                }
-            })
-            .catch(({ message }) =>
-                res.render('error', {
-                    path: req.param,
-                    pageTitle: 'Error',
-                    pageHeader: 'Sorry, something went wrong.',
-                    message,
+    return ProductModel.findById(id)
+        .then((product) => {
+            if (product) {
+                res.render('admin/product-form', {
+                    path: req.path,
+                    pageTitle: 'Edit product',
+                    pageHeader: `Edit ${product.title}`,
+                    submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
+                    product,
                     user,
-                }),
-            );
-    }
-
-    return req.stats(401).redirect(ROUTES.PRODUCTS.BASE);
+                });
+            }
+        })
+        .catch(({ message }) =>
+            res.render('error', {
+                path: req.param,
+                pageTitle: 'Error',
+                pageHeader: 'Sorry, something went wrong.',
+                message,
+                user,
+            }),
+        );
 };
 
 const deleteProduct = ({ user, ...req }, res) => {
-    if (!user) {
-        return res.redirect(ROUTES.AUTH.LOGIN);
-    }
-
     const { id } = req.body;
-    return ProductModel.findByIdAndDelete(id) // .then(() => req.user.deleteFromCart(id, Infinity))
+    return ProductModel.findByIdAndDelete(id)
         .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
         .catch(({ message }) => {
             return res.render('error', {
