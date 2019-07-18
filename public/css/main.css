@@ -269,3 +269,26 @@ form.btn-wrapper {
     display: none;
   }
 }
+.alert {
+  width: 50%;
+  max-width: 380px;
+  margin: 5px auto;
+  padding: 10px 15px;
+  background-color: rgba(255, 25, 25, .25);
+  border: 1px solid rgba(255, 25, 25, 1);
+  border-radius: 6px;
+  color: rgba(255, 25, 25, 1);
+}
+
+.alert-info {
+  background-color: rgba(86, 154, 218, .25);
+  border-color: rgba(86, 154, 218, 1);
+  color: rgba(86, 154, 218, 1);
+}
+
+.alert-success {
+  background-color: rgba(48, 133, 53, 0.25);
+  border-color: rgba(48, 133, 53, 1);
+  color: rgba(48, 133, 53, 1);
+}
+

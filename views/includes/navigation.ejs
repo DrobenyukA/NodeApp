@@ -35,12 +35,18 @@
             <% if (user) { %>
                 <li class="main-header__item">
                 <form action="/auth/logout" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
                     <button type="submit">Logout</button>
                 </form>
             </li>
             <% } else { %>
                 <li class="main-header__item">
                     <a href="/auth/login" class="<%= path === '/auth/login' ? 'active' : '' %>">Login</a>
+                </li>
+                <li class="main-header__item">
+                    <a href="/auth/signup" class="<%= path === '/auth/signup' ? 'active' : '' %>">
+                        Signup
+                    </a>
                 </li>
             <% } %>
         </ul>

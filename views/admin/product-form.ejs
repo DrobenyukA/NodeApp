@@ -15,6 +15,7 @@
         <h1><%= pageHeader %></h1>
 
         <form class="product-form" action="<%= submitHandlerPath %>" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <% if (product._id) { %>
                 <input type="hidden" name="id" value="<%= product._id %>"/>
             <% } %>

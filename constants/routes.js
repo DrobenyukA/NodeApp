@@ -23,5 +23,6 @@ module.exports = {
         BASE: '/auth',
         LOGIN: '/auth/login',
         LOGOUT: '/auth/logout',
+        SIGNUP: '/auth/signup',
     },
 };

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const { USER, PRODUCT } = require('../constants/models');
+const { EMAIL } = require('../constants/rules');
 const { ObjectId } = mongoose.Schema.Types;
 
 const schema = new mongoose.Schema({
@@ -12,10 +13,13 @@ const schema = new mongoose.Schema({
         type: String,
         required: true,
         validate: {
-            // eslint-disable-next-line
-            validator: (v) => /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v),
+            validator: (v) => EMAIL.test(v),
             message: (props) => `${props.value} is not a valid phone number!`,
         },
+    },
+    password: {
+        type: String,
+        required: true,
     },
     cart: {
         items: [
