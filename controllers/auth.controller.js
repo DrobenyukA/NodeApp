@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
+
 const ROUTES = require('../constants/routes');
 const RULES = require('../constants/rules');
 const User = require('../models/user.model');
+const mailer = require('../utils/mailer');
 
 const renderLoginForm = (req, res) => {
     if (req.user) {
@@ -72,6 +74,14 @@ const register = (req, res) => {
                 cart: { items: [] },
                 isAdmin: false,
             }).save(),
+        )
+        .then(() =>
+            mailer.sendMail({
+                to: email,
+                from: 'andriy.drobenyuk@gmail.com',
+                subject: 'Signup succeeded.',
+                html: '<h1>You have been signup successfully</h1>',
+            }),
         )
         .then(() => res.redirect('/auth/login'))
         .catch(({ message }) =>

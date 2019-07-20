@@ -16,4 +16,8 @@ module.exports = {
     session: {
         secret: process.env.SESSION_SECRET,
     },
+    email: {
+        user: process.env.EMAIL_USER,
+        key: process.env.EMAIL_KEY,
+    },
 };

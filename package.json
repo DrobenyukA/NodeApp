@@ -35,6 +35,8 @@
     "express-session": "^1.16.2",
     "lodash": "^4.17.14",
     "mongodb": "^3.2.5",
-    "mongoose": "^5.5.12"
+    "mongoose": "^5.5.12",
+    "nodemailer": "^6.3.0",
+    "nodemailer-sendgrid-transport": "^0.2.0"
   }
 }
