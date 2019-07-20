@@ -24,5 +24,7 @@ module.exports = {
         LOGIN: '/auth/login',
         LOGOUT: '/auth/logout',
         SIGNUP: '/auth/signup',
+        RESET_PASSWORD: '/auth/reset-password',
+        RESTORE_PASSWORD: '/auth/restore-password/:token',
     },
 };
