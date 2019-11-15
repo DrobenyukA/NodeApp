@@ -9,6 +9,24 @@
     <%- include('../includes/navigation.ejs') %>
     <main>
         <h1><%= pageHeader %></h1>
+        <iframe
+            src="http://localhost:8080?location=0000000106&livedata=occupancy&jwt=<%= token %>"
+            style="display: block; width: 800px; height: 600px; margin: 15px auto; border: 2px solid red;" frameborder="0"
+        >
+        </iframe>
+        <script>
+            const mobileMap = document.querySelector('iframe').contentWindow;
+            const sendMessage = (data) => mobileMap.postMessage(data, 'http://localhost:8080');
+            const initWeb = () => sendMessage({ type: "INIT", payload: { token: '<%= token %>' } }, window.location.origin);
+            const changeDimension = (dimension) => sendMessage({ type: "ACTION", payload: { name: 'showLiveData', args: [dimension] } });
+            const highlightLocation = (line, fill, locationId) => sendMessage({ type: "ACTION", payload: { name: 'highlightLocation', args: [line, fill, locationId] } });
+            window.onmessage = (e) => {
+                if (e.origin === 'http://localhost:8080') {
+                    console.log('From mobile map: ', e.data);
+                }
+            }
+        </script>
+        
         <% if (products.length) { %>
             <div class="grid">
                 <% products.forEach(({ _id: id, title, price, description, image }) => { %>

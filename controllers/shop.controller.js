@@ -10,6 +10,8 @@ const getIndex = ({ user, ...req }, res) => {
                 pageTitle: 'Home page',
                 pageHeader: 'Home page',
                 products,
+                token:
+                    'eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtY3Nzb2x1dGlvbnMiLCJleHAiOjE1NzM4NjM5NTQsInN1YiI6ImFkYkBzdW1vcmVhLmNvbSIsInRlbmFudCI6Im1jcyIsInV1aWQiOiIwYjZjZTg4YS1kNWQ3LTRiNjUtOGNiZi01YTBmZWI3OGIzMWIiLCJoYXNoIjoiL3NNcTFNN3BOK3REWGNONDZ6STg1UW1pQ3ZVUkQ3QmN6emVoL0JROVo3T1JNY3hzZUJFU3FwYUFkaTh2VHBtWCJ9.rgq5CrR_xsH2J8YIerfSfZTWo8IftSsuCPsdDLMo5ltCePKnMUWnn_C0cEs5SFp3qr8x7_4S4QqbHEsF9d4X-A',
                 user,
                 actions: {
                     addToCart: ROUTES.CART.BASE,
