@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { validationResult } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
-const RULES = require('../constants/rules');
 const User = require('../models/user.model');
 const mailer = require('../utils/mailer');
 
@@ -21,6 +21,7 @@ const renderSignInForm = (req, res) => {
             resetPassword: ROUTES.AUTH.RESET_PASSWORD,
         },
         user: undefined,
+        errors: [],
     });
 };
 
@@ -37,7 +38,7 @@ const renderSignUpForm = (req, res) => {
         },
         user: undefined,
         userData: {},
-        error: undefined,
+        errors: [],
     });
 };
 
@@ -51,6 +52,7 @@ const renderResetPasswordForm = (req, res) => {
         },
         user: undefined,
         userData: {},
+        errors: [],
     });
 };
 
@@ -70,20 +72,21 @@ const renderRestorePasswordForm = (req, res) => {
         user: undefined,
         userData: {},
         resetToken: token,
+        errors: [],
     });
 };
 
 const register = (req, res) => {
-    const { name, email, password, confirmPassword } = req.body;
-    let error = undefined;
-    if (!RULES.EMAIL.test(email)) {
-        error = 'Invalid email address';
-    }
-    if (password !== confirmPassword) {
-        error = 'Passwords are not equal';
-    }
-    if (error) {
-        return res.render('auth/signup-form', {
+    const { name, email, password } = req.body;
+    const errors = validationResult(req);
+    // if (!RULES.EMAIL.test(email)) {
+    //     error = 'Invalid email address';
+    // }
+    // if (password !== confirmPassword) {
+    //     error = 'Passwords are not equal';
+    // }
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/signup-form', {
             path: req.path,
             pageTitle: 'Signup',
             pageHeader: 'Please fill in form to signup',
@@ -92,16 +95,11 @@ const register = (req, res) => {
             },
             user: undefined,
             userData: { name, email },
-            error,
+            errors: errors.array().map(({ msg }) => msg),
         });
     }
-    return User.findOne({ email })
-        .then((user) => {
-            if (user) {
-                throw new Error('User with this email already exists.');
-            }
-            return bcrypt.hash(password, 12);
-        })
+    return bcrypt
+        .hash(password, 12)
         .then((password) =>
             new User({
                 email,
@@ -121,7 +119,7 @@ const register = (req, res) => {
         )
         .then(() => res.redirect('/auth/login'))
         .catch(({ message }) =>
-            res.render('auth/signup-form', {
+            res.status(422).render('auth/signup-form', {
                 path: req.path,
                 pageTitle: 'Signup',
                 pageHeader: 'Please fill in form to signup',
@@ -130,7 +128,7 @@ const register = (req, res) => {
                 },
                 user: undefined,
                 userData: { name, email },
-                error: message,
+                errors: [message],
             }),
         );
 };

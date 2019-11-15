@@ -13,9 +13,11 @@
     
     <main>
         <h1><%= pageHeader %></h1>
-        <% if (error) { %>
-            <p class="alert"><%= error %></p>
-        <% } %>
+        <% if (errors) { 
+            errors.forEach((msg) =>  { %>
+            <p class="alert"><%= msg %></p>
+        <% });
+            } %>
         <form class="login-form" action="<%= actions.signup %>" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <div class="form-control">
