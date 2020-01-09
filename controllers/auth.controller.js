@@ -6,6 +6,7 @@ const ROUTES = require('../constants/routes');
 const User = require('../models/user.model');
 const mailer = require('../utils/mailer');
 const { getErrors } = require('../utils/errors');
+const { isEmpty } = require('../utils');
 
 const renderSignInForm = (req, res) => {
     if (req.user) {
@@ -80,7 +81,7 @@ const renderRestorePasswordForm = (req, res) => {
 const register = (req, res) => {
     const { name, email, password } = req.body;
     const errors = getErrors(validationResult(req).array());
-    if (!errors.isEmpty()) {
+    if (!isEmpty(errors)) {
         return res.status(422).render('auth/signup-form', {
             path: req.path,
             pageTitle: 'Signup',
@@ -130,7 +131,7 @@ const register = (req, res) => {
         );
 };
 
-const authenticate = (req, res) => {
+const login = (req, res) => {
     const { email, password } = req.body;
     User.findOne({ email })
         .then((user) => {
@@ -240,7 +241,7 @@ module.exports = {
     renderSignInForm,
     restorePassword,
     resetPassword,
-    authenticate,
+    login,
     register,
     logout,
 };

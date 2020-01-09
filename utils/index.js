@@ -1,3 +1,3 @@
-const isEmpty = (obj) => Object.keys(obj).length === 0;
+const isEmpty = (obj) => (obj ? Object.keys(obj).length === 0 : true);
 
 module.exports = { isEmpty };

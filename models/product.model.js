@@ -16,7 +16,7 @@ const schema = new mongoose.Schema({
         src: String,
         alt: String,
     },
-    user: {
+    userId: {
         type: ObjectId,
         required: true,
         ref: USER,
