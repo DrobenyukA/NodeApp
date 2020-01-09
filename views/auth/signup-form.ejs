@@ -13,28 +13,40 @@
     
     <main>
         <h1><%= pageHeader %></h1>
-        <% if (errors) { 
-            errors.forEach((msg) =>  { %>
-            <p class="alert"><%= msg %></p>
-        <% });
-            } %>
+        <% if (errors.all) { %>
+            <% errors.all.forEach(({ msg }) =>  { %>
+                <p class="alert"><%= msg %></p>
+            <% }); %>
+        <% } %>
         <form class="login-form" action="<%= actions.signup %>" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-            <div class="form-control">
+            <div class="form-control <% if (errors.name) { %> has-error <% } %>">
                 <label for="name">Name</label>
                 <input type="text" name="name" id="name" maxlength="255" value="<%= userData.name %>"/>
+                <% if (errors.name) { %>
+                    <p class="alert"><%= errors.name %></p>
+                <% } %>
             </div>
-            <div class="form-control">
+            <div class="form-control <% if (errors.email) { %> has-error <% } %>">
                 <label for="email">E-Mail</label>
                 <input type="email" name="email" id="email" value="<%= userData.email %>"/>
+                <% if (errors.email) { %>
+                    <p class="alert"><%= errors.email %></p>
+                <% } %>
             </div>
-            <div class="form-control">
+            <div class="form-control <% if (errors.password) { %> has-error <% } %>">
                 <label for="password">Password</label>
                 <input type="password" name="password" id="password"/>
+                <% if (errors.password) { %>
+                    <p class="alert"><%= errors.password %></p>
+                <% } %>
             </div>
-            <div class="form-control">
+            <div class="form-control <% if (errors.confirmPassword) { %> has-error <% } %>">
                 <label for="confirmPassword">Confirm Password</label>
                 <input type="password" name="confirmPassword" id="confirmPassword"/>
+                <% if (errors.confirmPassword) { %>
+                    <p class="alert"><%= errors.confirmPassword %></p>
+                <% } %>
             </div>
             <button class="btn" type="submit">Signup</button>
         </form>

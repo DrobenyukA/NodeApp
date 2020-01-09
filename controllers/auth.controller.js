@@ -5,6 +5,7 @@ const { validationResult } = require('express-validator');
 const ROUTES = require('../constants/routes');
 const User = require('../models/user.model');
 const mailer = require('../utils/mailer');
+const { getErrors } = require('../utils/errors');
 
 const renderSignInForm = (req, res) => {
     if (req.user) {
@@ -21,7 +22,7 @@ const renderSignInForm = (req, res) => {
             resetPassword: ROUTES.AUTH.RESET_PASSWORD,
         },
         user: undefined,
-        errors: [],
+        errors: {},
     });
 };
 
@@ -38,7 +39,7 @@ const renderSignUpForm = (req, res) => {
         },
         user: undefined,
         userData: {},
-        errors: [],
+        errors: {},
     });
 };
 
@@ -52,7 +53,7 @@ const renderResetPasswordForm = (req, res) => {
         },
         user: undefined,
         userData: {},
-        errors: [],
+        errors: {},
     });
 };
 
@@ -72,13 +73,13 @@ const renderRestorePasswordForm = (req, res) => {
         user: undefined,
         userData: {},
         resetToken: token,
-        errors: [],
+        errors: {},
     });
 };
 
 const register = (req, res) => {
     const { name, email, password } = req.body;
-    const errors = validationResult(req);
+    const errors = getErrors(validationResult(req).array());
     if (!errors.isEmpty()) {
         return res.status(422).render('auth/signup-form', {
             path: req.path,
@@ -89,7 +90,7 @@ const register = (req, res) => {
             },
             user: undefined,
             userData: { name, email },
-            errors: errors.array().map(({ msg }) => msg),
+            errors,
         });
     }
     return bcrypt
@@ -112,7 +113,7 @@ const register = (req, res) => {
             }),
         )
         .then(() => res.redirect('/auth/login'))
-        .catch(({ message }) =>
+        .catch(({ msg }) =>
             res.status(422).render('auth/signup-form', {
                 path: req.path,
                 pageTitle: 'Signup',
@@ -122,7 +123,9 @@ const register = (req, res) => {
                 },
                 user: undefined,
                 userData: { name, email },
-                errors: [message],
+                errors: {
+                    all: [{ msg }],
+                },
             }),
         );
 };
