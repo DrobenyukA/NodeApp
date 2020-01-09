@@ -79,12 +79,6 @@ const renderRestorePasswordForm = (req, res) => {
 const register = (req, res) => {
     const { name, email, password } = req.body;
     const errors = validationResult(req);
-    // if (!RULES.EMAIL.test(email)) {
-    //     error = 'Invalid email address';
-    // }
-    // if (password !== confirmPassword) {
-    //     error = 'Passwords are not equal';
-    // }
     if (!errors.isEmpty()) {
         return res.status(422).render('auth/signup-form', {
             path: req.path,
@@ -152,7 +146,7 @@ const authenticate = (req, res) => {
         })
         .catch(({ message }) => {
             req.flash('error', message);
-            return res.redirect(ROUTES.ADMIN.LOGIN);
+            return res.redirect(ROUTES.AUTH.LOGIN);
         });
 };
 
