@@ -11,7 +11,7 @@ const getIndex = ({ user, ...req }, res) => {
                 pageHeader: 'Home page',
                 products,
                 token:
-                    'eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtY3Nzb2x1dGlvbnMiLCJleHAiOjE1NzM4NjM5NTQsInN1YiI6ImFkYkBzdW1vcmVhLmNvbSIsInRlbmFudCI6Im1jcyIsInV1aWQiOiIwYjZjZTg4YS1kNWQ3LTRiNjUtOGNiZi01YTBmZWI3OGIzMWIiLCJoYXNoIjoiL3NNcTFNN3BOK3REWGNONDZ6STg1UW1pQ3ZVUkQ3QmN6emVoL0JROVo3T1JNY3hzZUJFU3FwYUFkaTh2VHBtWCJ9.rgq5CrR_xsH2J8YIerfSfZTWo8IftSsuCPsdDLMo5ltCePKnMUWnn_C0cEs5SFp3qr8x7_4S4QqbHEsF9d4X-A',
+                    'eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtY3Nzb2x1dGlvbnMiLCJleHAiOjE1NzgwODM1MTksInN1YiI6ImFkYkBzdW1vcmVhLmNvbSIsInRlbmFudCI6Im1jcyIsInV1aWQiOiI0MzM5YTU0NC0zZWU3LTQ4YzktOTgzOC0wODM1YmRkZDFjMTMiLCJoYXNoIjoiZDhSMFQ5VXlwYmNtYStabGFOcXk2WFIyU3Zrby9WS29YMGs3TnBtVHFrSWhZc2wrdVcvQ3FjazkyalQvYTRILyJ9.vsi91xC_Apctm7OySLsnPQYFgfZnaazQQIk-1w6eWgt9ayd5BohCPvBB2cgeBxIkgVbhDc1QTSo3lTUtYoSK9w',
                 user,
                 actions: {
                     addToCart: ROUTES.CART.BASE,
