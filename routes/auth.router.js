@@ -18,8 +18,8 @@ router.get(ROUTES.AUTH.REGISTRATION, notForUsers, AuthController.renderRegistrat
 router.get(ROUTES.AUTH.RESET_PASSWORD, notForUsers, AuthController.renderResetPasswordForm);
 router.get(ROUTES.AUTH.RESTORE_PASSWORD, notForUsers, AuthController.renderRestorePasswordForm);
 
-router.post(ROUTES.AUTH.REGISTRATION, validateLoginForm(check), AuthController.register);
-router.post(ROUTES.AUTH.LOGIN, validateRegistrationForm(check), AuthController.login);
+router.post(ROUTES.AUTH.REGISTRATION, validateRegistrationForm(check), AuthController.register);
+router.post(ROUTES.AUTH.LOGIN, validateLoginForm(check), AuthController.login);
 router.post(ROUTES.AUTH.LOGOUT, AuthController.logout);
 router.post(ROUTES.AUTH.RESET_PASSWORD, validateResetPasswordForm(check), AuthController.resetPassword);
 router.post(ROUTES.AUTH.RESTORE_PASSWORD, validateRestoreForm(check), AuthController.restorePassword);

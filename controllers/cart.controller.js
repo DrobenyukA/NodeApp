@@ -31,6 +31,7 @@ const getCart = ({ user, ...req }, res) =>
 
 const addToCart = ({ user, ...req }, res) => {
     const { productId, quantity } = req.body;
+
     return ProductModel.findById(productId).then((product) => {
         if (product) {
             return user

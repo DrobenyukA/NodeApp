@@ -4,6 +4,7 @@ function validateLoginForm(check) {
     return [
         check('email')
             .isEmail()
+            .normalizeEmail()
             .withMessage('Incorrect email address'),
         check('password')
             .not()
@@ -24,6 +25,7 @@ function validateRegistrationForm(check) {
             .withMessage('Password should have at least 5 characters.'),
         check('email')
             .isEmail()
+            .normalizeEmail()
             .withMessage('Incorrect email address')
             .custom((email) =>
                 User.findOne({ email }).then((user) => {
@@ -46,6 +48,7 @@ function validateResetPasswordForm(check) {
     return [
         check('email')
             .isEmail()
+            .normalizeEmail()
             .withMessage('Incorrect email address'),
     ];
 }

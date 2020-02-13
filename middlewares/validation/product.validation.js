@@ -1,9 +1,11 @@
 function validateBook(check) {
     return [
-        check('title', 'The name should consist of at least 3 and not more than 255 characters.').isLength({
-            min: 3,
-            max: 255,
-        }),
+        check('title')
+            .isLength({
+                min: 3,
+                max: 255,
+            })
+            .withMessage('The name should consist of at least 3 and not more than 255 characters.'),
         check('imageSrc')
             .custom((value) => {
                 if (value) {
@@ -26,4 +28,6 @@ function validateBook(check) {
     ];
 }
 
-module.exports = validateBook;
+module.exports = {
+    validateBook,
+};

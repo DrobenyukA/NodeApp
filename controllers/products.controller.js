@@ -75,16 +75,15 @@ const updateProduct = (req, res) => {
     return handleProductNotFound(req, res);
 };
 
-const handleProductNotFound = ({ user, path }, res) => {
+const handleProductNotFound = ({ user, path }, res) =>
     res.status(404).render('404', {
         path: path,
         pageTitle: 'Product not found',
         pageHeader: 'Product not found.',
         user,
     });
-};
 
-const getProducts = ({ user, path, param }, res) => {
+const getProducts = ({ user, path, param }, res) =>
     ProductModel.find()
         .then((products) =>
             res.render('shop/products-list', {
@@ -110,11 +109,12 @@ const getProducts = ({ user, path, param }, res) => {
                 user,
             }),
         );
-};
 
 const getProduct = ({ user, ...req }, res) => {
     const { id } = req.params;
-    ProductModel.findById(id)
+    const errors = getErrors(validationResult(req).array());
+
+    return new Promise((res, rej) => (isEmpty(errors) ? res(ProductModel.findById(id)) : rej(new Error(errors.id))))
         .then((product) => {
             if (product) {
                 return res.render('shop/product-details', {
@@ -144,17 +144,24 @@ const getProduct = ({ user, ...req }, res) => {
 
 const editProduct = ({ user, ...req }, res) => {
     const { id } = req.params;
-    return ProductModel.findById(id)
+    const errors = getErrors(validationResult(req).array());
+
+    return new Promise((res, rej) => (isEmpty(errors) ? res(ProductModel.findById(id)) : rej(new Error(errors.id))))
         .then((product) => {
-            if (product) {
+            if (product && isEmpty(errors)) {
                 res.render('shop/product-form', {
                     path: req.path,
                     pageTitle: 'Edit product',
                     pageHeader: `Edit ${product.title}`,
-                    submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
+                    actions: {
+                        store: ROUTES.PRODUCTS.UPDATE,
+                    },
                     product,
                     user,
+                    errors: {},
                 });
+            } else {
+                throw new Error('There is now such product');
             }
         })
         .catch(({ message }) =>
@@ -170,8 +177,11 @@ const editProduct = ({ user, ...req }, res) => {
 
 const deleteProduct = ({ user, ...req }, res) => {
     const { id } = req.body;
+    const errors = getErrors(validationResult(req).array());
 
-    return ProductModel.findByIdAndDelete(id)
+    return new Promise((res, rej) =>
+        isEmpty(errors) ? res(ProductModel.findByIdAndDelete(id)) : rej(new Error(errors.id)),
+    )
         .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
         .catch(({ message }) => {
             return res.render('error', {
