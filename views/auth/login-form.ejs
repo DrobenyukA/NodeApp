@@ -18,13 +18,19 @@
         <% } %>
         <form class="login-form" action="<%= actions.loginHandler %>" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-            <div class="form-control">
+            <div class="form-control <% if (errors.email) { %> has-error <% } %>">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email" />
+                <% if (errors.email) { %>
+                    <p class="alert"><%= errors.email %></p>
+                <% } %>
             </div>
-            <div class="form-control">
+            <div class="form-control <% if (errors.password) { %> has-error <% } %>">
                 <label for="password">Password</label>
                 <input type="password" name="password" id="password" />
+                <% if (errors.password) { %>
+                    <p class="alert"><%= errors.password %></p>
+                <% } %>
             </div>
             <button type="submit" class="btn">
                 Login

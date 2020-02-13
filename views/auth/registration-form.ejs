@@ -18,11 +18,11 @@
                 <p class="alert"><%= msg %></p>
             <% }); %>
         <% } %>
-        <form class="login-form" action="<%= actions.signup %>" method="POST">
+        <form class="login-form" action="<%= actions.registration %>" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <div class="form-control <% if (errors.name) { %> has-error <% } %>">
                 <label for="name">Name</label>
-                <input type="text" name="name" id="name" maxlength="255" value="<%= userData.name %>"/>
+                <input type="text" name="name" id="name" maxlength="255"/>
                 <% if (errors.name) { %>
                     <p class="alert"><%= errors.name %></p>
                 <% } %>
@@ -48,7 +48,7 @@
                     <p class="alert"><%= errors.confirmPassword %></p>
                 <% } %>
             </div>
-            <button class="btn" type="submit">Signup</button>
+            <button class="btn" type="submit">Register</button>
         </form>
 
     </main>
