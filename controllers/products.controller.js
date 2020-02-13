@@ -96,8 +96,8 @@ const getProducts = ({ user, path, param }, res) => {
                 actions: {
                     viewProduct: ROUTES.PRODUCTS.PRODUCT,
                     addToCart: ROUTES.CART.BASE,
-                    editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
-                    deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
+                    editProduct: ROUTES.PRODUCTS.EDIT,
+                    deleteProduct: ROUTES.PRODUCTS.DELETE,
                 },
             }),
         )
@@ -170,6 +170,7 @@ const editProduct = ({ user, ...req }, res) => {
 
 const deleteProduct = ({ user, ...req }, res) => {
     const { id } = req.body;
+
     return ProductModel.findByIdAndDelete(id)
         .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
         .catch(({ message }) => {
