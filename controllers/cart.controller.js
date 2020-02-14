@@ -1,6 +1,10 @@
+const { validationResult } = require('express-validator');
+
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product.model');
 const ProductsController = require('../controllers/products.controller');
+const { isEmpty } = require('../utils');
+const { getErrors } = require('../utils/errors');
 
 const getCart = ({ user, ...req }, res) =>
     user
@@ -31,28 +35,35 @@ const getCart = ({ user, ...req }, res) =>
 
 const addToCart = ({ user, ...req }, res) => {
     const { productId, quantity } = req.body;
+    const errors = getErrors(validationResult(req).array());
 
-    return ProductModel.findById(productId).then((product) => {
-        if (product) {
-            return user
-                .addToCart(product, +quantity)
-                .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
-                .catch(({ message }) => {
-                    res.render('error', {
-                        path: req.path,
-                        pageTitle: 'Cart',
-                        pageHeader: 'Error on adding to cart',
-                        message,
-                        user,
-                    });
-                });
+    return new Promise((res, rej) => {
+        if (isEmpty(errors)) {
+            res(ProductModel.findById(productId));
+        } else {
+            rej(new Error(errors.productId || errors.quantity));
         }
-        return ProductsController.handleProductNotFound();
-    });
+    })
+        .then((product) => {
+            if (product) {
+                return user.addToCart(product, +quantity).then(() => res.redirect(ROUTES.PRODUCTS.BASE));
+            }
+            return ProductsController.handleProductNotFound();
+        })
+        .catch(({ message }) => {
+            res.render('error', {
+                path: req.path,
+                pageTitle: 'Cart',
+                pageHeader: 'Error on adding to cart',
+                message,
+                user,
+            });
+        });
 };
 
 const deleteItem = ({ user, ...req }, res) => {
     const { productId, quantity } = req.body;
+
     return user
         .deleteFromCart(productId, quantity)
         .then(() => res.redirect(ROUTES.CART.BASE))

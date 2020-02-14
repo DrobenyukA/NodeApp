@@ -3,7 +3,10 @@ function validateProduct(check) {
         check('productId')
             .escape()
             .isLength(24)
-            .withMessage('Incorrect identifier'),
+            .withMessage('Incorrect product identifier'),
+        check('quantity')
+            .isInt()
+            .withMessage('Incorrect quantity value'),
     ];
 }
 

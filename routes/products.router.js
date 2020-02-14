@@ -3,12 +3,12 @@ const { check } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
 const ProductsController = require('../controllers/products.controller');
-
-const router = express.Router();
 const forUser = require('../middlewares/forUser');
 const forAdmin = require('../middlewares/forAdmin');
 const { validateId } = require('../middlewares/validation');
 const { validateBook } = require('../middlewares/validation/product.validation');
+
+const router = express.Router();
 
 router.get(ROUTES.PRODUCTS.BASE, ProductsController.getProducts);
 router.get(ROUTES.PRODUCTS.PRODUCT, validateId(check), ProductsController.getProduct);

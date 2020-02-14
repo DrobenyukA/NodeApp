@@ -71,9 +71,6 @@ const checkout = ({ user, ...req }, res) => {
 };
 
 const createOrder = ({ user, ...req }, res) => {
-    if (!user) {
-        return res.redirect(ROUTES.AUTH.LOGIN);
-    }
     return user
         .getCart()
         .then(({ products }) => {
