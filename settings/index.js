@@ -8,6 +8,9 @@ dotenv.load({
 });
 
 module.exports = {
+    general: {
+        port: process.env.PORT,
+    },
     db: {
         password: process.env.DB_PASSWORD,
         user: process.env.DB_USER,

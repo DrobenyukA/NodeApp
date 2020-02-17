@@ -1,42 +1,59 @@
+const { validationResult } = require('express-validator');
+
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product.model');
+const { getErrors } = require('../utils/errors');
+const { isEmpty } = require('../utils');
 
-const createProduct = ({ user, ...req }, res) =>
-    res.render('admin/product-form', {
+const renderProductForm = ({ user, ...req }, res) =>
+    res.render('shop/product-form', {
         path: req.path,
         pageTitle: 'Add product',
         pageHeader: 'Add product',
-        submitHandlerPath: ROUTES.ADMIN.ADD_PRODUCT,
+        actions: { store: ROUTES.ADMIN.CREATE_PRODUCT },
         product: {},
+        errors: {},
         user,
     });
 
-const storeProduct = ({ user, body, param }, res) => {
+const storeProduct = (req, res) => {
+    const { user, body, param } = req;
     const { title, price, description, imageSrc: src, imageAlt: alt } = body;
     const { _id: userId } = user || { _id: undefined };
-    // TODO: add book validation
-    const product = new ProductModel({
+    const errors = getErrors(validationResult(req).array());
+    const product = {
         title,
         price,
         image: {
-            src: src || 'https://cdn1.iconfinder.com/data/icons/notes-filled-line/64/note-text-empty-book-512.png',
+            src,
             alt,
         },
         description,
         userId,
+    };
+    if (isEmpty(errors)) {
+        return new ProductModel(product)
+            .save()
+            .then(() => res.redirect(ROUTES.ROOT))
+            .catch(({ message }) => {
+                return res.render('error', {
+                    path: param,
+                    pageTitle: 'Error',
+                    pageHeader: 'Sorry, something went wrong.',
+                    message,
+                    user,
+                });
+            });
+    }
+    return res.render('shop/product-form', {
+        path: req.path,
+        pageTitle: 'Add product',
+        pageHeader: 'Add product',
+        actions: { store: ROUTES.ADMIN.CREATE_PRODUCT },
+        product,
+        errors,
+        user,
     });
-    return product
-        .save()
-        .then(() => res.redirect(ROUTES.ROOT))
-        .catch(({ message }) =>
-            res.render('error', {
-                path: param,
-                pageTitle: 'Error',
-                pageHeader: 'Sorry, something went wrong.',
-                message,
-                user,
-            }),
-        );
 };
 
 const updateProduct = (req, res) => {
@@ -58,16 +75,15 @@ const updateProduct = (req, res) => {
     return handleProductNotFound(req, res);
 };
 
-const handleProductNotFound = ({ user, path }, res) => {
+const handleProductNotFound = ({ user, path }, res) =>
     res.status(404).render('404', {
         path: path,
         pageTitle: 'Product not found',
         pageHeader: 'Product not found.',
         user,
     });
-};
 
-const getProducts = ({ user, path, param }, res) => {
+const getProducts = ({ user, path, param }, res) =>
     ProductModel.find()
         .then((products) =>
             res.render('shop/products-list', {
@@ -79,8 +95,8 @@ const getProducts = ({ user, path, param }, res) => {
                 actions: {
                     viewProduct: ROUTES.PRODUCTS.PRODUCT,
                     addToCart: ROUTES.CART.BASE,
-                    editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
-                    deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
+                    editProduct: ROUTES.PRODUCTS.EDIT,
+                    deleteProduct: ROUTES.PRODUCTS.DELETE,
                 },
             }),
         )
@@ -93,11 +109,12 @@ const getProducts = ({ user, path, param }, res) => {
                 user,
             }),
         );
-};
 
 const getProduct = ({ user, ...req }, res) => {
     const { id } = req.params;
-    ProductModel.findById(id)
+    const errors = getErrors(validationResult(req).array());
+
+    return new Promise((res, rej) => (isEmpty(errors) ? res(ProductModel.findById(id)) : rej(new Error(errors.id))))
         .then((product) => {
             if (product) {
                 return res.render('shop/product-details', {
@@ -127,17 +144,24 @@ const getProduct = ({ user, ...req }, res) => {
 
 const editProduct = ({ user, ...req }, res) => {
     const { id } = req.params;
-    return ProductModel.findById(id)
+    const errors = getErrors(validationResult(req).array());
+
+    return new Promise((res, rej) => (isEmpty(errors) ? res(ProductModel.findById(id)) : rej(new Error(errors.id))))
         .then((product) => {
-            if (product) {
-                res.render('admin/product-form', {
+            if (product && isEmpty(errors)) {
+                res.render('shop/product-form', {
                     path: req.path,
                     pageTitle: 'Edit product',
                     pageHeader: `Edit ${product.title}`,
-                    submitHandlerPath: ROUTES.ADMIN.UPDATE_PRODUCT,
+                    actions: {
+                        store: ROUTES.PRODUCTS.UPDATE,
+                    },
                     product,
                     user,
+                    errors: {},
                 });
+            } else {
+                throw new Error('There is now such product');
             }
         })
         .catch(({ message }) =>
@@ -153,7 +177,11 @@ const editProduct = ({ user, ...req }, res) => {
 
 const deleteProduct = ({ user, ...req }, res) => {
     const { id } = req.body;
-    return ProductModel.findByIdAndDelete(id)
+    const errors = getErrors(validationResult(req).array());
+
+    return new Promise((res, rej) =>
+        isEmpty(errors) ? res(ProductModel.findByIdAndDelete(id)) : rej(new Error(errors.id)),
+    )
         .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
         .catch(({ message }) => {
             return res.render('error', {
@@ -167,7 +195,7 @@ const deleteProduct = ({ user, ...req }, res) => {
 };
 
 module.exports = {
-    createProduct,
+    renderProductForm,
     editProduct,
     deleteProduct,
     getProducts,

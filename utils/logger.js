@@ -22,6 +22,10 @@ function printObject(object) {
     return JSON.stringify(object);
 }
 
+function logInfo(message) {
+    console.info(message);
+}
+
 function logRequest({ method, path, params, query, body }, res, next) {
     const style = chalk[STYLES_MAP[method]];
     console.log(style(`[${method}] ${path} `));
@@ -41,4 +45,5 @@ module.exports = {
     logRequest,
     printPort,
     logError: console.error,
+    logInfo,
 };

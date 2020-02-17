@@ -1,12 +1,15 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { validationResult } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
-const RULES = require('../constants/rules');
 const User = require('../models/user.model');
 const mailer = require('../utils/mailer');
+const createResetEmail = require('../emails/resetPassword.email');
+const { getErrors } = require('../utils/errors');
+const { isEmpty } = require('../utils');
 
-const renderSignInForm = (req, res) => {
+const renderSignInForm = (req, res, errors = {}) => {
     if (req.user) {
         return res.redirect(ROUTES.PRODUCTS.BASE);
     }
@@ -21,27 +24,28 @@ const renderSignInForm = (req, res) => {
             resetPassword: ROUTES.AUTH.RESET_PASSWORD,
         },
         user: undefined,
+        errors,
     });
 };
 
-const renderSignUpForm = (req, res) => {
+const renderRegistrationForm = (req, res, next, errors = {}) => {
     if (req.session.user) {
         return res.redirect('/');
     }
-    return res.render('auth/signup-form', {
+    return res.render('auth/registration-form', {
         path: req.path,
-        pageTitle: 'Signup',
-        pageHeader: 'Please fill in form to signup',
+        pageTitle: 'Registration',
+        pageHeader: 'Please fill in form to register',
         actions: {
-            signup: ROUTES.AUTH.SIGNUP,
+            registration: ROUTES.AUTH.REGISTRATION,
         },
         user: undefined,
-        userData: {},
-        error: undefined,
+        userData: req.body || {},
+        errors,
     });
 };
 
-const renderResetPasswordForm = (req, res) => {
+const renderResetPasswordForm = (req, res, next, errors = {}) => {
     return res.render('auth/reset-password-form', {
         path: req.path,
         pageTitle: 'Reset password',
@@ -50,11 +54,12 @@ const renderResetPasswordForm = (req, res) => {
             resetHandler: ROUTES.AUTH.RESET_PASSWORD,
         },
         user: undefined,
-        userData: {},
+        userData: req.body || {},
+        errors,
     });
 };
 
-const renderRestorePasswordForm = (req, res) => {
+const renderRestorePasswordForm = (req, res, next, errors = {}) => {
     const { token } = req.params;
     if (!token) {
         req.flash('error', 'You do not have restore token');
@@ -70,38 +75,29 @@ const renderRestorePasswordForm = (req, res) => {
         user: undefined,
         userData: {},
         resetToken: token,
+        errors,
     });
 };
 
 const register = (req, res) => {
-    const { name, email, password, confirmPassword } = req.body;
-    let error = undefined;
-    if (!RULES.EMAIL.test(email)) {
-        error = 'Invalid email address';
-    }
-    if (password !== confirmPassword) {
-        error = 'Passwords are not equal';
-    }
-    if (error) {
-        return res.render('auth/signup-form', {
+    const { name, email, password } = req.body;
+    const errors = getErrors(validationResult(req).array());
+
+    if (!isEmpty(errors)) {
+        return res.status(422).render('auth/registration-form', {
             path: req.path,
-            pageTitle: 'Signup',
-            pageHeader: 'Please fill in form to signup',
+            pageTitle: 'Registration',
+            pageHeader: 'Please fill in form to register',
             actions: {
-                signup: ROUTES.AUTH.SIGNUP,
+                registration: ROUTES.AUTH.REGISTRATION,
             },
             user: undefined,
             userData: { name, email },
-            error,
+            errors,
         });
     }
-    return User.findOne({ email })
-        .then((user) => {
-            if (user) {
-                throw new Error('User with this email already exists.');
-            }
-            return bcrypt.hash(password, 12);
-        })
+    return bcrypt
+        .hash(password, 12)
         .then((password) =>
             new User({
                 email,
@@ -115,105 +111,102 @@ const register = (req, res) => {
             mailer.sendMail({
                 to: email,
                 from: 'andriy.drobenyuk@gmail.com',
-                subject: 'Signup succeeded.',
-                html: '<h1>You have been signup successfully</h1>',
+                subject: 'Registration succeeded.',
+                html: '<h1>You have been register successfully</h1>',
             }),
         )
         .then(() => res.redirect('/auth/login'))
-        .catch(({ message }) =>
-            res.render('auth/signup-form', {
+        .catch(({ msg }) =>
+            res.status(422).render('auth/registration-form', {
                 path: req.path,
-                pageTitle: 'Signup',
-                pageHeader: 'Please fill in form to signup',
+                pageTitle: 'Registration',
+                pageHeader: 'Please fill in form to register',
                 actions: {
-                    signup: ROUTES.AUTH.SIGNUP,
+                    registration: ROUTES.AUTH.REGISTRATION,
                 },
                 user: undefined,
                 userData: { name, email },
-                error: message,
+                errors: {
+                    all: [{ msg }],
+                },
             }),
         );
 };
 
-const authenticate = (req, res) => {
+const login = (req, res) => {
     const { email, password } = req.body;
-    User.findOne({ email })
-        .then((user) => {
-            if (user) {
-                return user;
-            }
-            throw new Error('Please enter valid credentials to sign in.');
-        })
-        .then((user) => bcrypt.compare(password, user.password).then((isEqual) => (isEqual ? user._id : undefined)))
-        .then((userId) => {
-            if (userId) {
-                req.session.user = userId;
-                return res.redirect('/');
-            }
-            throw new Error('Please enter valid credentials to sign in.');
-        })
-        .catch(({ message }) => {
-            req.flash('error', message);
-            return res.redirect(ROUTES.ADMIN.LOGIN);
-        });
+    const errors = getErrors(validationResult(req).array());
+    console.log({ errors });
+    if (isEmpty(errors)) {
+        return User.findOne({ email })
+            .then((user) => {
+                if (user) {
+                    return user;
+                }
+                throw new Error('Please enter valid credentials to sign in.');
+            })
+            .then((user) => bcrypt.compare(password, user.password).then((isEqual) => (isEqual ? user._id : undefined)))
+            .then((userId) => {
+                if (userId) {
+                    req.session.user = userId;
+                    return res.redirect('/');
+                }
+                throw new Error('Please enter valid credentials to sign in.');
+            })
+            .catch(({ message }) => {
+                req.flash('error', message);
+                return res.redirect(ROUTES.AUTH.LOGIN);
+            });
+    }
+    return renderSignInForm(req, res, undefined, errors);
 };
 
 const logout = (req, res) => req.session.destroy(() => res.redirect('/auth/login'));
 
 const resetPassword = (req, res) => {
     const { email } = req.body;
-    crypto.randomBytes(32, (error, buffer) => {
-        if (error) {
-            req.flash('error', error.message);
-            return res.redirect(ROUTES.AUTH.RESET_PASSWORD);
-        }
-        const token = buffer.toString('hex');
-        User.findOne({ email })
-            .then((user) => {
-                if (!user) {
-                    throw new Error('There is no user with this email');
-                }
-                user.resetToken = token;
-                user.resetTokenExpiration = Date.now() + 3600000;
-                return user.save();
-            })
-            .then(() => {
-                mailer.sendMail({
-                    to: email,
-                    from: 'andriy.drobenyuk@gmail.com',
-                    subject: 'Password reset',
-                    html: `
-                        <h1>You are going to reset password</h1>
-                        <p>
-                            Please click on this
-                            <a href="http://localhost:3000${ROUTES.AUTH.RESTORE_PASSWORD.replace(':token', token)}"> 
-                                link
-                            </a>
-                            to reset the password
-                        </p>
-                        <p>If it wasn't you please contact our support</p>
-                    `,
-                });
+    const errors = getErrors(validationResult(req).array());
+    if (isEmpty(errors)) {
+        return crypto.randomBytes(32, (error, buffer) => {
+            if (error) {
+                req.flash('error', error.message);
+                return res.redirect(ROUTES.AUTH.RESET_PASSWORD);
+            }
+            const token = buffer.toString('hex');
+            User.findOne({ email })
+                .then((user) => {
+                    if (!user) {
+                        throw new Error('There is no user with this email');
+                    }
+                    user.resetToken = token;
+                    user.resetTokenExpiration = Date.now() + 3600000;
+                    return user.save();
+                })
+                .then(() => {
+                    mailer.sendMail(createResetEmail(email, token));
 
-                req.flash('success', 'Please check you email address');
-                return res.redirect(ROUTES.AUTH.RESET_PASSWORD);
-            })
-            .catch(({ message }) => {
-                req.flash('error', message);
-                return res.redirect(ROUTES.AUTH.RESET_PASSWORD);
-            });
-    });
+                    req.flash('success', 'Please check you email address');
+                    return res.redirect(ROUTES.AUTH.RESET_PASSWORD);
+                })
+                .catch(({ message }) => {
+                    req.flash('error', message);
+                    return res.redirect(ROUTES.AUTH.RESET_PASSWORD);
+                });
+        });
+    }
+    return renderResetPasswordForm(req, res, undefined, errors);
 };
 
 const restorePassword = (req, res) => {
-    const { resetToken, newPassword, confirmPassword } = req.body;
+    const { resetToken, newPassword } = req.body;
+    const errors = getErrors(validationResult(req).array());
 
     if (!resetToken) {
         req.flash('error', 'You do not have restore token');
         res.redirect(ROUTES.AUTH.RESET_PASSWORD);
     }
 
-    if (newPassword !== confirmPassword) {
+    if (errors.password) {
         req.flash('error', 'Passwords are not equal');
         return res.redirect(ROUTES.AUTH.RESTORE_PASSWORD.replace(':token', resetToken));
     }
@@ -241,11 +234,11 @@ const restorePassword = (req, res) => {
 module.exports = {
     renderRestorePasswordForm,
     renderResetPasswordForm,
-    renderSignUpForm,
+    renderRegistrationForm,
     renderSignInForm,
     restorePassword,
     resetPassword,
-    authenticate,
+    login,
     register,
     logout,
 };

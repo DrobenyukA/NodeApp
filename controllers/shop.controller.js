@@ -14,8 +14,8 @@ const getIndex = ({ user, ...req }, res) => {
                 actions: {
                     addToCart: ROUTES.CART.BASE,
                     viewProduct: ROUTES.PRODUCTS.PRODUCT,
-                    editProduct: ROUTES.ADMIN.EDIT_PRODUCT,
-                    deleteProduct: ROUTES.ADMIN.DELETE_PRODUCT,
+                    editProduct: ROUTES.PRODUCTS.EDIT,
+                    deleteProduct: ROUTES.PRODUCTS.DELETE,
                 },
             });
         })
@@ -71,9 +71,6 @@ const checkout = ({ user, ...req }, res) => {
 };
 
 const createOrder = ({ user, ...req }, res) => {
-    if (!user) {
-        return res.redirect(ROUTES.AUTH.LOGIN);
-    }
     return user
         .getCart()
         .then(({ products }) => {
