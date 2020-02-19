@@ -7,12 +7,13 @@ const handlePageNotFound = (req, res) => {
     });
 };
 
-const handleServerError = (req, res) => {
+const handleServerError = (req, res, next, error) => {
     res.status(500).render('500', {
         path: req.path,
         pageTitle: 'Server error.',
         pageHeader: 'Sorry, something went wrong.',
         user: req.user,
+        message: error.message,
     });
 };
 

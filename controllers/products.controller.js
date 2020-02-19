@@ -5,23 +5,40 @@ const ProductModel = require('../models/product.model');
 const { getErrors } = require('../utils/errors');
 const { isEmpty } = require('../utils');
 
-const renderProductForm = ({ user, ...req }, res) =>
-    res.render('shop/product-form', {
-        path: req.path,
-        pageTitle: 'Add product',
-        pageHeader: 'Add product',
-        actions: { store: ROUTES.ADMIN.CREATE_PRODUCT },
-        product: {},
-        errors: {},
+const handleProductNotFound = ({ user, path }, res) =>
+    res.status(404).render('404', {
+        path,
+        pageTitle: 'Product not found',
+        pageHeader: 'Product not found.',
         user,
     });
 
-const storeProduct = (req, res) => {
-    const { user, body, param } = req;
+const handleProductError = ({ user, path }, res, next, error) =>
+    res.status(500).render('500', {
+        path,
+        pageTitle: 'Server Error',
+        pageHeader: 'Sorry something went wrong.',
+        user,
+        message: error.message,
+    });
+
+const renderProductForm = ({ user, path }, res, next, errors = {}) => {
+    res.render('shop/product-form', {
+        path,
+        pageTitle: 'Add product',
+        pageHeader: 'Add product',
+        actions: { store: ROUTES.PRODUCTS.CREATE },
+        product: {},
+        errors,
+        user,
+    });
+};
+
+const getProductFromRequest = ({ user, body }) => {
     const { title, price, description, imageSrc: src, imageAlt: alt } = body;
     const { _id: userId } = user || { _id: undefined };
-    const errors = getErrors(validationResult(req).array());
-    const product = {
+
+    return {
         title,
         price,
         image: {
@@ -31,20 +48,19 @@ const storeProduct = (req, res) => {
         description,
         userId,
     };
+};
+
+const storeProduct = (req, res, next) => {
+    const errors = getErrors(validationResult(req).array());
+    const product = getProductFromRequest(req);
+
     if (isEmpty(errors)) {
         return new ProductModel(product)
             .save()
             .then(() => res.redirect(ROUTES.ROOT))
-            .catch(({ message }) => {
-                return res.render('error', {
-                    path: param,
-                    pageTitle: 'Error',
-                    pageHeader: 'Sorry, something went wrong.',
-                    message,
-                    user,
-                });
-            });
+            .catch((error) => handleProductError(req, res, next, error));
     }
+
     return res.render('shop/product-form', {
         path: req.path,
         pageTitle: 'Add product',
@@ -52,46 +68,41 @@ const storeProduct = (req, res) => {
         actions: { store: ROUTES.ADMIN.CREATE_PRODUCT },
         product,
         errors,
-        user,
+        user: req.user,
     });
 };
 
-const updateProduct = (req, res) => {
+const updateProduct = (req, res, next) => {
     const { id: productId, title, price, description, imageSrc: src, imageAlt: alt } = req.body;
     if (productId) {
         return ProductModel.findById(productId)
             .then((product) => {
-                product.title = title;
-                product.price = price;
-                product.description = description;
-                product.image.src = src;
-                product.image.alt = alt;
-                product.updatedAt = new Date().toISOString();
-                return product.save();
+                if (product) {
+                    product.title = title;
+                    product.price = price;
+                    product.description = description;
+                    product.image.src = src;
+                    product.image.alt = alt;
+                    product.updatedAt = new Date().toISOString();
+                    return product.save();
+                }
+                return handleProductNotFound(req, res);
             })
             .then(() => res.redirect(ROUTES.ROOT))
-            .catch();
+            .catch((error) => handleProductError(req, res, next, error));
     }
     return handleProductNotFound(req, res);
 };
 
-const handleProductNotFound = ({ user, path }, res) =>
-    res.status(404).render('404', {
-        path: path,
-        pageTitle: 'Product not found',
-        pageHeader: 'Product not found.',
-        user,
-    });
-
-const getProducts = ({ user, path, param }, res) =>
+const getProducts = (req, res, next) =>
     ProductModel.find()
         .then((products) =>
             res.render('shop/products-list', {
-                path: path,
+                path: req.path,
                 pageTitle: 'Books shop',
                 pageHeader: 'My Products',
                 products,
-                user,
+                user: req.user,
                 actions: {
                     viewProduct: ROUTES.PRODUCTS.PRODUCT,
                     addToCart: ROUTES.CART.BASE,
@@ -100,17 +111,9 @@ const getProducts = ({ user, path, param }, res) =>
                 },
             }),
         )
-        .catch(({ message }) =>
-            res.render('error', {
-                path: param,
-                pageTitle: 'Error',
-                pageHeader: 'Sorry, something went wrong.',
-                message,
-                user,
-            }),
-        );
+        .catch((error) => handleProductError(req, res, next, error));
 
-const getProduct = ({ user, ...req }, res) => {
+const getProduct = (req, res, next) => {
     const { id } = req.params;
     const errors = getErrors(validationResult(req).array());
 
@@ -122,7 +125,7 @@ const getProduct = ({ user, ...req }, res) => {
                     pageTitle: `Books shop | ${product.title}`,
                     pageHeader: `Product ${product.title}`,
                     product,
-                    user,
+                    user: req.user,
                     actions: {
                         addToCart: ROUTES.CART.BASE,
                     },
@@ -131,51 +134,35 @@ const getProduct = ({ user, ...req }, res) => {
                 return handleProductNotFound(req, res);
             }
         })
-        .catch(({ message }) =>
-            res.render('error', {
-                path: req.param,
-                pageTitle: 'Error',
-                pageHeader: 'Sorry, something went wrong.',
-                message,
-                user,
-            }),
-        );
+        .catch((error) => handleProductError(req, res, next, error));
 };
 
-const editProduct = ({ user, ...req }, res) => {
+const editProduct = (req, res, next) => {
     const { id } = req.params;
     const errors = getErrors(validationResult(req).array());
-
-    return new Promise((res, rej) => (isEmpty(errors) ? res(ProductModel.findById(id)) : rej(new Error(errors.id))))
+    console.log('editProduct');
+    return new Promise((res) => (isEmpty(errors) ? res(ProductModel.findById(id)) : res({})))
         .then((product) => {
-            if (product && isEmpty(errors)) {
-                res.render('shop/product-form', {
+            if (product) {
+                return res.render('shop/product-form', {
                     path: req.path,
                     pageTitle: 'Edit product',
-                    pageHeader: `Edit ${product.title}`,
+                    pageHeader: `Edit ${product.title || 'product'}`,
                     actions: {
                         store: ROUTES.PRODUCTS.UPDATE,
                     },
                     product,
-                    user,
-                    errors: {},
+                    user: req.user,
+                    errors: errors,
                 });
             } else {
-                throw new Error('There is now such product');
+                return handleProductNotFound(req, res);
             }
         })
-        .catch(({ message }) =>
-            res.render('error', {
-                path: req.param,
-                pageTitle: 'Error',
-                pageHeader: 'Sorry, something went wrong.',
-                message,
-                user,
-            }),
-        );
+        .catch((error) => handleProductError(req, res, next, error));
 };
 
-const deleteProduct = ({ user, ...req }, res) => {
+const deleteProduct = (req, res, next) => {
     const { id } = req.body;
     const errors = getErrors(validationResult(req).array());
 
@@ -183,15 +170,7 @@ const deleteProduct = ({ user, ...req }, res) => {
         isEmpty(errors) ? res(ProductModel.findByIdAndDelete(id)) : rej(new Error(errors.id)),
     )
         .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
-        .catch(({ message }) => {
-            return res.render('error', {
-                path: req.param,
-                pageTitle: 'Error',
-                pageHeader: 'Sorry, something went wrong.',
-                message,
-                user,
-            });
-        });
+        .catch((error) => handleProductError(req, res, next, error));
 };
 
 module.exports = {
