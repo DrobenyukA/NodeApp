@@ -17,7 +17,6 @@ const STYLES_MAP = {
     PORT: '#007bff',
 };
 
-// TODO: create logs files and write down all operations there
 function printPort(port) {
     console.log(`Server started on ${chalk.hex(STYLES_MAP.PORT)(`http://localhost:${port}`)}`);
 }
