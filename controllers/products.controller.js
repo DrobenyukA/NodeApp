@@ -140,7 +140,6 @@ const getProduct = (req, res, next) => {
 const editProduct = (req, res, next) => {
     const { id } = req.params;
     const errors = getErrors(validationResult(req).array());
-    console.log('editProduct');
     return new Promise((res) => (isEmpty(errors) ? res(ProductModel.findById(id)) : res({})))
         .then((product) => {
             if (product) {

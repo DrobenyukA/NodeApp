@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+
 const { USER, PRODUCT } = require('../constants/models');
+const { logInfo } = require('../utils/logger');
 const { ObjectId } = mongoose.Schema.Types;
 
 const schema = new mongoose.Schema({
@@ -30,6 +32,6 @@ const schema = new mongoose.Schema({
 });
 
 const model = mongoose.model(PRODUCT, schema);
-model.watch().on('change', (data) => console.log(`Product changed at ${new Date().toISOString()}:`, data));
+model.watch().on('change', (data) => logInfo(`Product changed at ${new Date().toISOString()}:${JSON.stringify(data)}`));
 
 module.exports = model;

@@ -6,3 +6,6 @@
 
 #Environment
 .env
+
+#Log files
+/logs/**
