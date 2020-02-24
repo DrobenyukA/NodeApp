@@ -136,7 +136,6 @@ const register = (req, res) => {
 const login = (req, res) => {
     const { email, password } = req.body;
     const errors = getErrors(validationResult(req).array());
-    console.log({ errors });
     if (isEmpty(errors)) {
         return User.findOne({ email })
             .then((user) => {

@@ -2,7 +2,7 @@ const forAdmin = (req, res, next) => {
     if (req.user.isAdmin) {
         return next();
     }
-    return res.status(404).render('error', {
+    return res.status(599).render('error', {
         path: req.param,
         pageTitle: 'Error',
         pageHeader: 'Sorry, something went wrong.',

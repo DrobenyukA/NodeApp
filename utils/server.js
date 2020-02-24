@@ -2,7 +2,10 @@ const logger = require('./logger');
 /* eslint-disable no-process-exit */
 
 function startServer(app, port) {
-    const server = app.listen(port, () => logger.printPort(port));
+    const server = app.listen(port, () => {
+        logger.logInfo(`Server started on port ${port} at ${new Date().toISOString()}`);
+        logger.printPort(port);
+    });
     process.on('exit', (code) => logger.log(`Exit with code ${code}`));
     ['SIGTERM', 'SIGINT', 'SIGHUP'].forEach((signal) => process.on(signal, () => stopHandler(server, port)));
 }

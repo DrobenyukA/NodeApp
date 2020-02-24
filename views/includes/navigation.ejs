@@ -24,7 +24,7 @@
                 </li>
                 <% if (user.isAdmin) { %>
                     <li class="main-header__item">
-                        <a href="/admin/product/create" class="<%= path === '/admin/product/create' ? 'active' : '' %>">
+                        <a href="/products/create" class="<%= path === '/product/create' ? 'active' : '' %>">
                             Add product
                         </a>
                     </li>
@@ -34,11 +34,14 @@
         <ul class="main-header__item-list">
             <% if (user) { %>
                 <li class="main-header__item">
-                <form action="/auth/logout" method="POST">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-                    <button type="submit">Logout</button>
-                </form>
-            </li>
+                    <span class="main-header__user-name">Hello, <%= user.name %></span>
+                </li>
+                <li class="main-header__item">
+                    <form action="/auth/logout" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+                        <button type="submit">Logout</button>
+                    </form>
+                </li>
             <% } else { %>
                 <li class="main-header__item">
                     <a href="/auth/login" class="<%= path === '/auth/login' ? 'active' : '' %>">Login</a>

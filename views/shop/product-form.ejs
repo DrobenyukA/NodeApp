@@ -13,11 +13,13 @@
     
     <main>
         <h1><%= pageHeader %></h1>
-        <% console.log({ errors }) %>
         <form class="product-form" action="<%= actions.store %>" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <% if (product._id) { %>
                 <input type="hidden" name="id" value="<%= product._id %>"/>
+            <% } %>
+            <% if (errors.id) { %>
+                <p class="alert"><%= errors.id %></p>
             <% } %>
             <div class="form-control <% if (errors.title) { %> has-error <% } %>">
                 <label for="title">Title</label>
