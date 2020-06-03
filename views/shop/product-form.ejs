@@ -13,7 +13,7 @@
     
     <main>
         <h1><%= pageHeader %></h1>
-        <form class="product-form" action="<%= actions.store %>" method="POST">
+        <form class="product-form" action="<%= actions.store %>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <% if (product._id) { %>
                 <input type="hidden" name="id" value="<%= product._id %>"/>
@@ -28,11 +28,11 @@
                     <p class="alert"><%= errors.title %></p>
                 <% } %>
             </div>
-            <div class="form-control <% if (errors.imageSrc) { %> has-error <% } %>">
-                <label for="imageUrl">Image URL</label>
-                <input type="text" name="imageSrc" id="imageUrl" value="<%= product.image && product.image.src  %>"/>
-                <% if (errors.imageSrc) { %>
-                    <p class="alert"><%= errors.imageSrc %></p>
+            <div class="form-control">
+                <label for="image">Image</label>
+                <input type="file" name="image" id="image"/>
+                <% if (errors.image) { %>
+                    <p class="alert"><%= errors.image %></p>
                 <% } %>
             </div>
             <div class="form-control <% if (errors.imageAlt) { %> has-error <% } %>">

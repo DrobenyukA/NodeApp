@@ -5,6 +5,8 @@ const ProductModel = require('../models/product.model');
 const { getErrors } = require('../utils/errors');
 const { isEmpty } = require('../utils');
 
+const getProductImageSrc = (file) => `${ROUTES.IMAGES.PRODUCTS}/${file.filename}`;
+
 const handleProductNotFound = ({ user, path }, res) =>
     res.status(404).render('404', {
         path,
@@ -34,25 +36,28 @@ const renderProductForm = ({ user, path }, res, next, errors = {}) => {
     });
 };
 
-const getProductFromRequest = ({ user, body }) => {
-    const { title, price, description, imageSrc: src, imageAlt: alt } = body;
+const getProductFromRequest = ({ user, body, file }, errors) => {
+    const { title, price, description, imageAlt: alt } = body;
     const { _id: userId } = user || { _id: undefined };
-
-    return {
-        title,
-        price,
-        image: {
-            src,
-            alt,
-        },
-        description,
-        userId,
-    };
+    if (file) {
+        return {
+            title,
+            price,
+            image: {
+                src: getProductImageSrc(file),
+                alt,
+            },
+            description,
+            userId,
+        };
+    }
+    errors.image = 'Invalid file';
+    return {};
 };
 
 const storeProduct = (req, res, next) => {
-    const errors = getErrors(validationResult(req).array());
-    const product = getProductFromRequest(req);
+    let errors = getErrors(validationResult(req).array());
+    const product = getProductFromRequest(req, errors);
 
     if (isEmpty(errors)) {
         return new ProductModel(product)
@@ -65,7 +70,7 @@ const storeProduct = (req, res, next) => {
         path: req.path,
         pageTitle: 'Add product',
         pageHeader: 'Add product',
-        actions: { store: ROUTES.ADMIN.CREATE_PRODUCT },
+        actions: { store: ROUTES.PRODUCTS.CREATE },
         product,
         errors,
         user: req.user,
@@ -73,17 +78,23 @@ const storeProduct = (req, res, next) => {
 };
 
 const updateProduct = (req, res, next) => {
-    const { id: productId, title, price, description, imageSrc: src, imageAlt: alt } = req.body;
-    if (productId) {
+    const errors = getErrors(validationResult(req).array());
+    const productId = req.body.id;
+    // In this case we ignore errors with uploaded file
+    const updatedProduct = getProductFromRequest(req, {});
+
+    if (isEmpty(errors) && productId) {
         return ProductModel.findById(productId)
             .then((product) => {
                 if (product) {
-                    product.title = title;
-                    product.price = price;
-                    product.description = description;
-                    product.image.src = src;
-                    product.image.alt = alt;
+                    product.title = updatedProduct.title;
+                    product.price = updatedProduct.price;
+                    product.description = updatedProduct.description;
+                    product.image.alt = updatedProduct.alt;
                     product.updatedAt = new Date().toISOString();
+                    if (req.file) {
+                        product.image.src = getProductImageSrc(req.file);
+                    }
                     return product.save();
                 }
                 return handleProductNotFound(req, res);
