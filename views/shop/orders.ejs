@@ -16,10 +16,15 @@
                 <ul class="orders">
                     <% orders.forEach(order => { %>
                         <li class="orders__item">
-                            <p># <strong><%= order._id %></strong></p>
+                            <p>
+                                # <strong><%= order._id %></strong> - 
+                                <a href="<%= actions.downloadInvoice.replace(':orderId', order._id) %>">invoice</a> 
+                            </p>
                             <ul class="orders__products">
                                 <% order.productsData.forEach(product => { %>
-                                    <li class="orders__products-item"><%= product.title %> (<%= product.quantity %>)</li>
+                                    <li class="orders__products-item">
+                                        <%= product.title %> (<%= product.quantity %>)
+                                    </li>
                                 <% }); %>
                             </ul>
                         </li>

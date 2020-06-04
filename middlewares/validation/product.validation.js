@@ -6,14 +6,6 @@ function validateBook(check) {
                 max: 255,
             })
             .withMessage('The name should consist of at least 3 and not more than 255 characters.'),
-        check('imageSrc')
-            .custom((value) => {
-                if (value) {
-                    return value.includes('http://localhost');
-                }
-                return true;
-            })
-            .withMessage('Please provide an correct image URL'),
         check('imageAlt')
             .custom((value, { req }) => {
                 if (req.body.imageSrc) {

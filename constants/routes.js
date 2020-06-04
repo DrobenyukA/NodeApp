@@ -14,6 +14,7 @@ module.exports = {
     },
     ORDERS: {
         BASE: '/orders',
+        INVOICE: '/orders/invoice/:orderId',
         CHECKOUT: '/checkout',
     },
     AUTH: {
@@ -23,5 +24,9 @@ module.exports = {
         REGISTRATION: '/auth/registration',
         RESET_PASSWORD: '/auth/reset-password',
         RESTORE_PASSWORD: '/auth/restore-password/:token',
+    },
+    IMAGES: {
+        BASE: '/images',
+        PRODUCTS: '/images/products',
     },
 };
