@@ -19,7 +19,10 @@
                             <p># <strong><%= order._id %></strong></p>
                             <ul class="orders__products">
                                 <% order.productsData.forEach(product => { %>
-                                    <li class="orders__products-item"><%= product.title %> (<%= product.quantity %>)</li>
+                                    <li class="orders__products-item">
+                                        <%= product.title %> (<%= product.quantity %>) -
+                                        <a href="<%= actions.downloadInvoice.replace(':orderId', order._id) %>">invoice</a> 
+                                    </li>
                                 <% }); %>
                             </ul>
                         </li>
