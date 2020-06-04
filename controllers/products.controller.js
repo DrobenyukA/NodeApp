@@ -1,6 +1,9 @@
 const { validationResult } = require('express-validator');
+const fs = require('fs');
+const path = require('path');
 
 const ROUTES = require('../constants/routes');
+const { PUBLIC } = require('../constants/path');
 const ProductModel = require('../models/product.model');
 const { getErrors } = require('../utils/errors');
 const { isEmpty } = require('../utils');
@@ -93,6 +96,7 @@ const updateProduct = (req, res, next) => {
                     product.image.alt = updatedProduct.alt;
                     product.updatedAt = new Date().toISOString();
                     if (req.file) {
+                        fs.promises.unlink(path.join(PUBLIC, product.image.src));
                         product.image.src = getProductImageSrc(req.file);
                     }
                     return product.save();
@@ -176,9 +180,14 @@ const deleteProduct = (req, res, next) => {
     const { id } = req.body;
     const errors = getErrors(validationResult(req).array());
 
-    return new Promise((res, rej) =>
-        isEmpty(errors) ? res(ProductModel.findByIdAndDelete(id)) : rej(new Error(errors.id)),
-    )
+    return new Promise((res, rej) => (isEmpty(errors) ? res(ProductModel.findById(id)) : rej(new Error(errors.id))))
+        .then((product) => {
+            if (product) {
+                fs.promises.unlink(path.join(PUBLIC, product.image.src));
+                return product.remove();
+            }
+            throw new Error('Product not found');
+        })
         .then(() => res.redirect(ROUTES.PRODUCTS.BASE))
         .catch((error) => handleProductError(req, res, next, error));
 };

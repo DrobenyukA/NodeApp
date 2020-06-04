@@ -147,17 +147,11 @@ const downloadInvoice = (req, res, next) => {
                 }
                 throw new Error('Not allowed');
             })
-            .then((order) => {
-                // TODO: generate invoice pdf file
-                return order;
-            })
-            .then((order) => {
-                return OrderService.getInvoiceFileStream(invoiceFileName);
-            })
+            .then((order) => OrderService.createInvoice(order, invoiceFileName))
             .then((invoiceFileStream) => {
                 res.setHeader('Content-Type', 'application/pdf');
                 res.setHeader('Content-Disposition', `inline; filename="${invoiceFileName}"`);
-                return invoiceFileStream.pipe(res);
+                return invoiceFileStream(res);
             })
             .catch((error) => {
                 if (error.message === 'Order not found') {
