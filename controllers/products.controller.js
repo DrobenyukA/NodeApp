@@ -4,6 +4,7 @@ const path = require('path');
 
 const ROUTES = require('../constants/routes');
 const { PUBLIC } = require('../constants/path');
+const { PRODUCTS_PER_PAGE } = require('../constants/settings');
 const ProductModel = require('../models/product.model');
 const { getErrors } = require('../utils/errors');
 const { isEmpty } = require('../utils');
@@ -82,18 +83,17 @@ const storeProduct = (req, res, next) => {
 
 const updateProduct = (req, res, next) => {
     const errors = getErrors(validationResult(req).array());
-    const productId = req.body.id;
+    const { id: productId, title, price, description, imageAlt } = req.body;
     // In this case we ignore errors with uploaded file
-    const updatedProduct = getProductFromRequest(req, {});
 
     if (isEmpty(errors) && productId) {
         return ProductModel.findById(productId)
             .then((product) => {
                 if (product) {
-                    product.title = updatedProduct.title;
-                    product.price = updatedProduct.price;
-                    product.description = updatedProduct.description;
-                    product.image.alt = updatedProduct.alt;
+                    product.title = title;
+                    product.price = price;
+                    product.description = description;
+                    product.image.alt = imageAlt;
                     product.updatedAt = new Date().toISOString();
                     if (req.file) {
                         fs.promises.unlink(path.join(PUBLIC, product.image.src));
@@ -109,24 +109,37 @@ const updateProduct = (req, res, next) => {
     return handleProductNotFound(req, res);
 };
 
-const getProducts = (req, res, next) =>
-    ProductModel.find()
-        .then((products) =>
-            res.render('shop/products-list', {
-                path: req.path,
-                pageTitle: 'Books shop',
-                pageHeader: 'My Products',
-                products,
-                user: req.user,
-                actions: {
-                    viewProduct: ROUTES.PRODUCTS.PRODUCT,
-                    addToCart: ROUTES.CART.BASE,
-                    editProduct: ROUTES.PRODUCTS.EDIT,
-                    deleteProduct: ROUTES.PRODUCTS.DELETE,
-                },
-            }),
+const getProducts = (req, res, next) => {
+    const page = +req.query.page || 1;
+
+    return ProductModel.find()
+        .countDocuments()
+        .then((productsCount) =>
+            ProductModel.find()
+                .skip((page - 1) * PRODUCTS_PER_PAGE)
+                .limit(PRODUCTS_PER_PAGE)
+                .then((products) =>
+                    res.render('shop/products-list', {
+                        path: req.path,
+                        pageTitle: 'Books shop',
+                        pageHeader: 'My Products',
+                        products,
+                        user: req.user,
+                        pages: Math.ceil(productsCount / PRODUCTS_PER_PAGE),
+                        hasPreviousPage: page > 1,
+                        currentPage: page,
+                        hasNextPage: page < Math.ceil(productsCount / PRODUCTS_PER_PAGE),
+                        actions: {
+                            viewProduct: ROUTES.PRODUCTS.PRODUCT,
+                            addToCart: ROUTES.CART.BASE,
+                            editProduct: ROUTES.PRODUCTS.EDIT,
+                            deleteProduct: ROUTES.PRODUCTS.DELETE,
+                        },
+                    }),
+                ),
         )
         .catch((error) => handleProductError(req, res, next, error));
+};
 
 const getProduct = (req, res, next) => {
     const { id } = req.params;
@@ -155,7 +168,7 @@ const getProduct = (req, res, next) => {
 const editProduct = (req, res, next) => {
     const { id } = req.params;
     const errors = getErrors(validationResult(req).array());
-    return new Promise((res) => (isEmpty(errors) ? res(ProductModel.findById(id)) : res({})))
+    return new Promise((res) => (isEmpty(errors) ? res(ProductModel.findById(id)) : res(null)))
         .then((product) => {
             if (product) {
                 return res.render('shop/product-form', {

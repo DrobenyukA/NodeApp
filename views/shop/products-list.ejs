@@ -40,6 +40,7 @@
                     </article>
                 <% }) %>
             </div>
+            <%- include('../includes/pagination.ejs', { pages, current: currentPage, hasNextPage, hasPreviousPage }) %>
         <% } else { %>
             <div class="notice notice-info">
                 There are no products.
