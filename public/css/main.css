@@ -148,7 +148,7 @@ form {
   border-color: #ffeb3b;
 }
 
-backdrop {
+.backdrop {
   position: fixed;
   top: 0;
   left: 0;
@@ -262,6 +262,25 @@ form.btn-wrapper {
 
 .text-center{
   text-align: center;
+}
+
+.pagination {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.pagination .page {
+  margin: 0 1rem;
+  padding: 0.25rem 0.5rem;
+  color: #00695c;
+  border: 1px solid #00695c;
+  text-decoration: none;
+}
+
+.pagination .page:hover,
+.pagination .page.is-active {
+  color: #fff;
+  background-color: #00695c;
 }
 
 @media (min-width: 768px) {

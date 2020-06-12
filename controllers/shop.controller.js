@@ -1,6 +1,7 @@
 const ProductModel = require('../models/product.model');
 const OrderModel = require('../models/order.model');
 const ROUTES = require('../constants/routes');
+const { PRODUCTS_PER_PAGE } = require('../constants/settings');
 const OrderService = require('../services/order.service');
 
 const handleOrderNotFound = ({ user, path }, res) =>
@@ -28,8 +29,10 @@ const handleOrderError = ({ user, path }, res, next, error) =>
         message: error.message,
     });
 
-const getIndex = ({ user, ...req }, res) => {
+const getIndex = ({ user, ...req }, res) =>
     ProductModel.find()
+        .sort({ createdAt: -1 })
+        .limit(PRODUCTS_PER_PAGE)
         .then((products) => {
             res.render('shop/index', {
                 path: req.path,
@@ -54,7 +57,6 @@ const getIndex = ({ user, ...req }, res) => {
                 user,
             }),
         );
-};
 
 const getCart = ({ user, ...req }, res) => {
     res.render('shop/cart', {
