@@ -317,3 +317,26 @@ form.btn-wrapper {
 
 
 
+.table {
+  width: 75%;
+  margin: 15px auto;
+  border-collapse: collapse;
+}  
+
+.table th,
+.table td {
+  padding: 15px;
+  border: 2px solid #ccc;
+}
+
+.table th {
+  background-color: rgb(235, 235, 235);
+}
+
+.table-total-price {
+  width: 75%;
+  margin: 0 auto 15px;
+  padding: 0 15px;
+  font-size: 1.25rem;
+  text-align: right;
+}

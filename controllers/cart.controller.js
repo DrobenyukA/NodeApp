@@ -18,7 +18,7 @@ const getCart = ({ user, ...req }, res) =>
                 totalPrice,
                 actions: {
                     deleteFromCart: ROUTES.CART.DELETE_ITEM,
-                    orderNow: ROUTES.ORDERS.BASE,
+                    orderNow: ROUTES.ORDERS.CHECKOUT,
                 },
                 user,
             });

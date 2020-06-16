@@ -1,8 +1,14 @@
 const ProductModel = require('../models/product.model');
 const OrderModel = require('../models/order.model');
+const { payments } = require('../settings');
+const stripe = require('stripe')(payments.secret);
 const ROUTES = require('../constants/routes');
 const { PRODUCTS_PER_PAGE } = require('../constants/settings');
 const OrderService = require('../services/order.service');
+
+function generateURL(req, suffix) {
+    return `${req.protocol}://${req.get('host')}${suffix}`;
+}
 
 const handleOrderNotFound = ({ user, path }, res) =>
     res.status(404).render('404', {
@@ -29,7 +35,7 @@ const handleOrderError = ({ user, path }, res, next, error) =>
         message: error.message,
     });
 
-const getIndex = ({ user, ...req }, res) =>
+const getIndex = ({ user, ...req }, res, next) =>
     ProductModel.find()
         .sort({ createdAt: -1 })
         .limit(PRODUCTS_PER_PAGE)
@@ -48,24 +54,7 @@ const getIndex = ({ user, ...req }, res) =>
                 },
             });
         })
-        .catch(({ message }) =>
-            res.render('error', {
-                path: req.param,
-                pageTitle: 'Error',
-                pageHeader: 'Sorry, something went wrong.',
-                message,
-                user,
-            }),
-        );
-
-const getCart = ({ user, ...req }, res) => {
-    res.render('shop/cart', {
-        path: req.path,
-        pageTitle: 'Cart',
-        pageHeader: 'Cart',
-        user,
-    });
-};
+        .catch((error) => handleOrderError({ user, ...req }, res, next, error));
 
 const getOrders = ({ user, ...req }, res) => {
     OrderModel.find()
@@ -90,15 +79,6 @@ const getOrders = ({ user, ...req }, res) => {
                 user,
             }),
         );
-};
-
-const checkout = ({ user, ...req }, res) => {
-    res.render('shop/checkout', {
-        path: req.path,
-        pageTitle: 'Checkout',
-        pageHeader: 'Checkout',
-        user,
-    });
 };
 
 const createOrder = ({ user, ...req }, res) => {
@@ -168,11 +148,45 @@ const downloadInvoice = (req, res, next) => {
     return handleOrderNotFound(req, res);
 };
 
+const renderCheckoutPage = (req, res, next) => {
+    return req.user
+        .getCart()
+        .then((cart) =>
+            stripe.checkout.sessions
+                .create({
+                    payment_method_types: ['card'],
+                    success_url: generateURL(req, ROUTES.ORDERS.CHECKOUT_SUCCESS),
+                    cancel_url: generateURL(req, ROUTES.ORDERS.CHECKOUT_FAILED),
+                    line_items: cart.products.map((product) => ({
+                        name: product.title,
+                        description: product.description,
+                        // because we need to specify it in cents
+                        amount: +(product.price * 100).toFixed(),
+                        // TODO: move it to constants
+                        currency: 'usd',
+                        quantity: product.quantity,
+                    })),
+                })
+                .then((session) => [cart, session]),
+        )
+        .then(([cart, session]) => {
+            return res.render('shop/checkout', {
+                path: req.path,
+                pageTitle: 'Checkout',
+                pageHeader: 'Checkout',
+                products: cart.products,
+                user: req.user,
+                totalPrice: cart.totalPrice,
+                sessionId: session.id,
+            });
+        })
+        .catch((error) => handleOrderError(req, res, next, error));
+};
+
 module.exports = {
     getIndex,
-    getCart,
     getOrders,
-    checkout,
     createOrder,
+    renderCheckoutPage,
     downloadInvoice,
 };
