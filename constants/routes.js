@@ -15,7 +15,9 @@ module.exports = {
     ORDERS: {
         BASE: '/orders',
         INVOICE: '/orders/invoice/:orderId',
-        CHECKOUT: '/checkout',
+        CHECKOUT: '/orders/checkout',
+        CHECKOUT_SUCCESS: '/orders/checkout/success',
+        CHECKOUT_FAILED: '/orders/checkout/failed',
     },
     AUTH: {
         BASE: '/auth',

@@ -23,4 +23,7 @@ module.exports = {
         user: process.env.EMAIL_USER,
         key: process.env.EMAIL_KEY,
     },
+    payments: {
+        secret: process.env.STRIPE_KEY,
+    },
 };

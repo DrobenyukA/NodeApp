@@ -9,8 +9,47 @@
     <%- include('../includes/navigation.ejs') %>
     <main>
         <h1><%= pageHeader %></h1>
-        
+        <% if (products.length === 0) { %>
+            <p>There is not products in a cart.</p>
+        <% } else { %>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Unit price</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                <% products.forEach((product) => { %>
+                    <tr>
+                        <td>
+                            <%= product.title %>
+                        </td>
+                        <td>
+                            <%= product.quantity %>
+                        </td>
+                        <td>
+                            $<%= product.price %>
+                        </td>
+                        <td>
+                            $<%= Number(product.price) * Number(product.quantity) %>
+                        </td>
+                    </tr>
+                <% }) %>
+                </tbody>
+            </table>
+            <p class="table-total-price">
+                Total price: <strong>$<%= totalPrice %></strong>
+            </p>
+            <div class="text-center">
+                <button id="order-btn" class="btn" data-session-id="<%= sessionId %>">Order</button>
+            </div>
+        <% } %>
     </main>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="/js/checkout.js"></script>
     <%- include('../includes/scripts.ejs') %>
 </body>
 
