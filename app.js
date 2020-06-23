@@ -28,7 +28,7 @@ app.use(express.static(PUBLIC));
 app.use(session(configs.session));
 app.use(withProductImage);
 app.use(ROUTES.API.BASE, allowCORS);
-app.use(ROUTES.API.BASE, apiRouter);
+app.use(apiRouter);
 app.use(csrf());
 app.use(flash());
 app.use(logger.logRequest);

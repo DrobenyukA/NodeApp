@@ -34,8 +34,12 @@ module.exports = {
     API: {
         BASE: '/api',
         LATEST: {
-            BASE: '/latest',
-            PRODUCTS: '/latest/products',
+            BASE: '/api/latest',
+            PRODUCTS: {
+                BASE: '/api/latest/products',
+                IMAGE: '/api/latest/products/image',
+                PRODUCT: '/api/latest/products/:id',
+            },
         },
     },
 };

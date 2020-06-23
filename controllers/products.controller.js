@@ -33,7 +33,10 @@ const renderProductForm = ({ user, path }, res, next, errors = {}) => {
         path,
         pageTitle: 'Add product',
         pageHeader: 'Add product',
-        actions: { store: ROUTES.PRODUCTS.CREATE },
+        actions: {
+            store: ROUTES.API.LATEST.PRODUCTS.BASE,
+            upload: ROUTES.API.LATEST.PRODUCTS.IMAGE,
+        },
         product: {},
         errors,
         user,
@@ -111,7 +114,6 @@ const updateProduct = (req, res, next) => {
 
 const getProducts = (req, res, next) => {
     const page = +req.query.page || 1;
-
     return ProductModel.find()
         .countDocuments()
         .then((productsCount) =>
@@ -176,7 +178,8 @@ const editProduct = (req, res, next) => {
                     pageTitle: 'Edit product',
                     pageHeader: `Edit ${product.title || 'product'}`,
                     actions: {
-                        store: ROUTES.PRODUCTS.UPDATE,
+                        store: ROUTES.API.LATEST.PRODUCTS.BASE,
+                        upload: ROUTES.API.LATEST.PRODUCTS.IMAGE,
                     },
                     product,
                     user: req.user,
