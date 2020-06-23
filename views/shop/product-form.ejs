@@ -13,7 +13,12 @@
     
     <main>
         <h1><%= pageHeader %></h1>
-        <form id="product-form" class="product-form" action="<%= actions.store %>">
+        <form
+            id="product-form"
+            class="product-form"
+            action="<%= actions.store %>"
+            data-method="<% if (product._id) { %>PUT<% } else { %>POST<% }%>"
+        >
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <% if (product._id) { %>
                 <input type="hidden" name="id" value="<%= product._id %>"/>
@@ -68,7 +73,6 @@
                 </button>
             </div>
         </form>
-        // TODO: finish upload image and create product API methods
         <div id="modal" class="modal hidden">
             <div class="modal-container">
                 <button type="button" class="modal-close-btn">&times;</button>

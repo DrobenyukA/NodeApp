@@ -24,3 +24,9 @@
 .product__description {
     text-align: center;
 }
+
+.product-image {
+    display: block;
+    width: 100px;
+    margin: 5px auto;
+}
