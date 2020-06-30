@@ -12,5 +12,6 @@ router.use(authRouter);
 router.use(shopRouter);
 router.use(cartRouter);
 router.use(PageController.handlePageNotFound);
+router.use(PageController.handleServerError);
 
 module.exports = router;

@@ -8,13 +8,10 @@ const handleProductImageSubmit = (e) => {
     const modal = document.querySelector('#modal');
     const { action, dataset } = e.target;
     const { method } = dataset;
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    // TODO: add data from form
-    fetch(action, { method, headers, data: {} })
+    const body = new FormData(e.target);
+    fetch(action, { method, body })
         .then((resp) => {
-            if (resp.status >= 500) {
+            if (resp.status >= 400) {
                 return resp.json().then(({ message }) => {
                     throw new Error(message);
                 });
@@ -42,6 +39,7 @@ const handleProductImageSubmit = (e) => {
 
 const handleProductFormSubmit = (e) => {
     e.preventDefault();
+    // TODO: process submit
     console.log('SUBMIT', { e });
     return false;
 };

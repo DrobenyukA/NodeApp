@@ -1,13 +1,13 @@
-const { validationResult } = require('express-validator');
 const fs = require('fs');
 const path = require('path');
+const { isEmpty } = require('lodash');
+const { validationResult } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
 const { PUBLIC } = require('../constants/path');
 const { PRODUCTS_PER_PAGE } = require('../constants/settings');
 const ProductModel = require('../models/product.model');
 const { getErrors } = require('../utils/errors');
-const { isEmpty } = require('../utils');
 
 const getProductImageSrc = (file) => `${ROUTES.IMAGES.PRODUCTS}/${file.filename}`;
 

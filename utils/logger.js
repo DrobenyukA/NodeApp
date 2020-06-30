@@ -2,9 +2,7 @@
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
-const { first } = require('lodash');
-
-const _ = require('./index');
+const { first, isEmpty } = require('lodash');
 const { LOGS_DIR } = require('../constants/path');
 
 const STYLES_MAP = {
@@ -48,13 +46,13 @@ function logInfo(message) {
 function logRequest({ method, path, params, query, body }, res, next) {
     const style = chalk.hex(STYLES_MAP[method]);
     console.log(style(`[${method}] ${path} `));
-    if (!_.isEmpty(query)) {
+    if (!isEmpty(query)) {
         console.log(style(`    query: ${printObject(query)}`));
     }
-    if (!_.isEmpty(params)) {
+    if (!isEmpty(params)) {
         console.log(style(`    params: ${printObject(params)}`));
     }
-    if (!_.isEmpty(body)) {
+    if (!isEmpty(body)) {
         console.log(style(`    body: ${printObject(body)}`));
     }
     next();

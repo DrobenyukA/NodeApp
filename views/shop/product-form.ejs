@@ -80,12 +80,12 @@
                     id="product-image-form"
                     class="product-image-form"
                     action="<%= actions.upload %>"
-                    data-method="<% if (product._id) { %>PUT<% } else { %>POST<% }%>"
+                    data-method="POST"
                     method="POST"
                 >
                     <div class="form-control">
                         <label for="image">Image</label>
-                        <input type="file" name="image" id="image"/>
+                        <input type="file" name="image" id="image" />
                         <p class="alert alert-image-src hidden"></p>
                     </div>
                     <div class="form-control <% if (errors.imageAlt) { %> has-error <% } %>">

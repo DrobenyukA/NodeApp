@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { isEmpty } = require('lodash');
 const { validationResult } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
@@ -7,7 +8,6 @@ const User = require('../models/user.model');
 const mailer = require('../utils/mailer');
 const createResetEmail = require('../emails/resetPassword.email');
 const { getErrors } = require('../utils/errors');
-const { isEmpty } = require('../utils');
 
 const renderSignInForm = (req, res, errors = {}) => {
     if (req.user) {
