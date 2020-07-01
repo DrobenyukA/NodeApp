@@ -56,8 +56,21 @@ const readProduct = (req, res) => {
     return handleError(res)(error);
 };
 
-const updateProduct = (req, res, next) => {
-    return next(new Error('Not implemented'));
+const updateProduct = (req, res) => {
+    const errorsList = validationResult(req);
+    const error = new Error();
+    const { id, title, price, description, imageAlt, imageSrc } = req.body;
+
+    if (errorsList.isEmpty()) {
+        return service
+            .updateProduct({ id, title, price, description, imageAlt, imageSrc })
+            .then((result) => res.json(result))
+            .catch(handleError(res));
+    }
+    error.statusCode = 422;
+    error.message = 'Validation failed';
+    error.data = getErrors(errorsList.array());
+    return handleError(res)(error);
 };
 
 const deleteProduct = (req, res) => {};

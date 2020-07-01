@@ -6,10 +6,9 @@ const renderUploadImageModal = (e) => {
 const handleProductImageSubmit = (e) => {
     e.preventDefault();
     const modal = document.querySelector('#modal');
-    const { action, dataset } = e.target;
-    const { method } = dataset;
+    const { action } = e.target;
     const body = new FormData(e.target);
-    fetch(action, { method, body })
+    fetch(action, { method: 'POST', body })
         .then((resp) => {
             if (resp.status >= 400) {
                 return resp.json().then(({ message }) => {
@@ -39,9 +38,30 @@ const handleProductImageSubmit = (e) => {
 
 const handleProductFormSubmit = (e) => {
     e.preventDefault();
-    // TODO: process submit
-    console.log('SUBMIT', { e });
-    return false;
+    const { action, dataset, elements } = e.target;
+    const { method } = dataset;
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    const body = JSON.stringify({
+        id: elements.id.value,
+        title: elements.title.value,
+        imageSrc: elements.imageSrc.value,
+        imageAlt: elements.imageAlt.value,
+        price: elements.price.value,
+        description: elements.description.value,
+    });
+    fetch(action, { method, headers, body })
+        .then((resp) => {
+            if (resp.status >= 400) {
+                return resp.json().then(({ message }) => {
+                    throw new Error(message);
+                });
+            }
+            return resp.json();
+        })
+        .then((res) => (window.location.href = `/products/${res._id}`))
+        .catch(({ message }) => alert(message));
 };
 
 document.querySelector('#show-image-form-btn').addEventListener('click', renderUploadImageModal);

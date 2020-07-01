@@ -1,5 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+
 const ProductModel = require('../models/product.model');
 const ROUTES = require('../constants/routes');
+const { PUBLIC } = require('../constants/path');
 
 function getProductsById(id) {
     return ProductModel.findById(id).catch(() => undefined);
@@ -42,10 +46,31 @@ function saveProduct(product) {
 
 const getProductImageSrc = (file) => `${ROUTES.IMAGES.PRODUCTS}/${file.filename}`;
 
+function updateProduct(product) {
+    return ProductModel.findById(product.id).then((result) => {
+        if (result) {
+            result.title = product.title;
+            result.price = product.price;
+            result.description = product.description;
+            result.image.alt = product.imageAlt;
+            result.updatedAt = new Date().toISOString();
+            if (result.image.src !== product.imageSrc) {
+                fs.promises.unlink(path.join(PUBLIC, result.image.src));
+                result.image.src = product.imageSrc;
+            }
+            return result.save();
+        }
+        const error = new Error('Product not found.');
+        error.statusCode = 404;
+        throw error;
+    });
+}
+
 module.exports = {
     getProductsById,
     getProductFromRequest,
     getProductsPage,
     getProductImageSrc,
     saveProduct,
+    updateProduct,
 };

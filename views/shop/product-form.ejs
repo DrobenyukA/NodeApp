@@ -40,7 +40,7 @@
                     alt="<%= product.image && product.image.alt %>"
                 />
                 <input type="hidden" name="imageSrc" value="<%= product.image && product.image.src %>" />
-                <input type="hidden" name="imageAlt" value="<% product.image && product.image.alt %>" />
+                <input type="hidden" name="imageAlt" value="<%= product.image && product.image.alt %>" />
                 <button type="button" id="show-image-form-btn" class="btn">
                     <% if (product._id) { %>
                         Change image
@@ -90,7 +90,7 @@
                     </div>
                     <div class="form-control <% if (errors.imageAlt) { %> has-error <% } %>">
                         <label for="imageAlt">Alternative text</label>
-                        <input type="text" name="imageAlt" id="imageAlt" value="<%= product.imageAlt  %>"/>
+                        <input type="text" name="imageAlt" id="imageAlt" value="<%= product.image.alt  %>"/>
                         <p class="alert alert-image-alt hidden"></p>
                     </div>
                     <button type="submit" class="btn">Upload</button>
