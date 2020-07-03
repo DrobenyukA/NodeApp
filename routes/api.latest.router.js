@@ -2,10 +2,10 @@ const express = require('express');
 const { check } = require('express-validator');
 
 const { API } = require('../constants/routes');
-const productsController = require('../controllers/api/latest/products.controller');
 const { validateId } = require('../middlewares/validation');
-const { validateBook, validateBookImageAlt } = require('../middlewares/validation/product.validation');
 const withProductImage = require('../middlewares/withProductImage');
+const productsController = require('../controllers/api/latest/products.controller');
+const { validateBook, validateBookImageAlt } = require('../middlewares/validation/product.validation');
 
 const router = express.Router();
 
@@ -21,5 +21,6 @@ router.post(
 );
 
 router.get(API.LATEST.PRODUCTS.PRODUCT, productsController.readProduct);
+router.delete(API.LATEST.PRODUCTS.PRODUCT, productsController.deleteProduct);
 
 module.exports = router;

@@ -60,6 +60,15 @@ function updateProduct(product) {
             }
             return result.save();
         }
+        return undefined;
+    });
+}
+
+function removeProduct(id) {
+    return ProductModel.findById(id).then((product) => {
+        if (product) {
+            return fs.promises.unlink(path.join(PUBLIC, product.image.src)).then(() => product.remove());
+        }
         const error = new Error('Product not found.');
         error.statusCode = 404;
         throw error;
@@ -73,4 +82,5 @@ module.exports = {
     getProductImageSrc,
     saveProduct,
     updateProduct,
+    removeProduct,
 };

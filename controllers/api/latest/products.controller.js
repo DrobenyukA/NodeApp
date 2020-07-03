@@ -64,7 +64,14 @@ const updateProduct = (req, res) => {
     if (errorsList.isEmpty()) {
         return service
             .updateProduct({ id, title, price, description, imageAlt, imageSrc })
-            .then((result) => res.json(result))
+            .then((updateProduct) => {
+                if (updateProduct) {
+                    return res.json(updateProduct);
+                }
+                error.message = 'Product not found.';
+                error.statusCode = 404;
+                throw error;
+            })
             .catch(handleError(res));
     }
     error.statusCode = 422;
@@ -73,7 +80,11 @@ const updateProduct = (req, res) => {
     return handleError(res)(error);
 };
 
-const deleteProduct = (req, res) => {};
+const deleteProduct = (req, res) =>
+    service
+        .removeProduct(req.params.id)
+        .then(() => res.json({ success: true }))
+        .catch(handleError(res));
 
 const uploadProductImage = (req, res) => {
     const errorsList = validationResult(req);

@@ -135,7 +135,7 @@ const getProducts = (req, res, next) => {
                             viewProduct: ROUTES.PRODUCTS.PRODUCT,
                             addToCart: ROUTES.CART.BASE,
                             editProduct: ROUTES.PRODUCTS.EDIT,
-                            deleteProduct: ROUTES.PRODUCTS.DELETE,
+                            deleteProduct: ROUTES.API.LATEST.PRODUCTS.PRODUCT,
                         },
                     }),
                 ),

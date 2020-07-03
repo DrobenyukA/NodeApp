@@ -44,7 +44,7 @@ const handleProductFormSubmit = (e) => {
         'Content-Type': 'application/json',
     };
     const body = JSON.stringify({
-        id: elements.id.value,
+        id: elements.id ? elements.id.value : undefined,
         title: elements.title.value,
         imageSrc: elements.imageSrc.value,
         imageAlt: elements.imageAlt.value,

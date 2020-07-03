@@ -90,7 +90,7 @@
                     </div>
                     <div class="form-control <% if (errors.imageAlt) { %> has-error <% } %>">
                         <label for="imageAlt">Alternative text</label>
-                        <input type="text" name="imageAlt" id="imageAlt" value="<%= product.image.alt  %>"/>
+                        <input type="text" name="imageAlt" id="imageAlt" value="<%= product.image && product.image.alt  %>"/>
                         <p class="alert alert-image-alt hidden"></p>
                     </div>
                     <button type="submit" class="btn">Upload</button>
