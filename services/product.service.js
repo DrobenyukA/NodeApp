@@ -6,11 +6,13 @@ const ROUTES = require('../constants/routes');
 const { PUBLIC } = require('../constants/path');
 
 function getProductsById(id) {
-    return ProductModel.findById(id).catch(() => undefined);
+    return ProductModel.findById(id);
 }
 
 function getProductFromRequest(req) {
     const { title, price, description, imageSrc: src, imageAlt: alt } = req.body;
+    const { _id: userId } = req.user || { _id: '5e2fd91def4d353e656bf013' };
+
     return {
         title,
         price,
@@ -19,7 +21,7 @@ function getProductFromRequest(req) {
             src,
             alt,
         },
-        userId: '5e2fd91def4d353e656bf013',
+        userId,
     };
 }
 
