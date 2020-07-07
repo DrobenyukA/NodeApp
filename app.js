@@ -26,11 +26,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(PUBLIC));
 app.use(session(configs.session));
+app.use(withUser);
 app.use(ROUTES.API.BASE, allowCORS);
 app.use(apiRouter);
 app.use(csrf());
 app.use(flash());
-app.use(withUser);
 app.use(withLocals);
 app.use(appRouter);
 

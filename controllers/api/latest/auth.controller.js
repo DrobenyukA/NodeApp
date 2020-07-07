@@ -18,11 +18,7 @@ const login = (req, res) => {
             .getUserByEmailAndPassword(userData)
             .then((user) => {
                 if (user) {
-                    return res.status(201).json({
-                        name: user.name,
-                        email: user.email,
-                        cart: user.cart,
-                    });
+                    return res.status(201).json(user);
                 }
                 error.statusCode = 422;
                 error.message = 'Incorrect email or password';

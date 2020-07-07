@@ -26,4 +26,7 @@ module.exports = {
     payments: {
         secret: process.env.STRIPE_KEY,
     },
+    auth: {
+        secret: process.env.AUTH_SECRET,
+    },
 };

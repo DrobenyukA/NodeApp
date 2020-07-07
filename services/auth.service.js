@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { isUndefined } = require('lodash');
 
+const { auth } = require('../settings');
 const User = require('../models/user.model');
 const SALT = 12;
 
@@ -19,10 +22,30 @@ const getUserDataFromRequest = ({ body }) => {
     return { name, email, password };
 };
 
+const getClientUser = (user) => ({
+    name: user.name,
+    email: user.email,
+    cart: user.cart,
+    roles: [user.isAdmin ? 'admin' : 'customer'],
+});
+
 const getUserByEmailAndPassword = ({ email, password }) =>
-    User.findOne({ email }).then((user) =>
-        user ? bcrypt.compare(password, user.password).then((result) => (result ? user : undefined)) : undefined,
-    );
+    User.findOne({ email })
+        .then((user) => {
+            if (isUndefined(user)) {
+                throw new Error('There is no such user');
+            }
+            return bcrypt.compare(password, user.password).then((hasSamePassword) => {
+                if (hasSamePassword) {
+                    return user;
+                }
+                throw new Error('Invalid credentials');
+            });
+        })
+        .then((user) => {
+            const token = jwt.sign({ userId: user._id.toString() }, auth.secret, { expiresIn: '15m' });
+            return { ...getClientUser(user), token };
+        });
 
 const createUser = (user) =>
     bcrypt.hash(user.password, SALT).then((hashedPassword) =>
@@ -38,6 +61,7 @@ const createUser = (user) =>
 module.exports = {
     isNotRegisteredEmail,
     isSameUser,
+    getClientUser,
     getUserDataFromRequest,
     getUserByEmailAndPassword,
     createUser,

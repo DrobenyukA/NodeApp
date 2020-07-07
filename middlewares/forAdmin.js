@@ -1,8 +1,13 @@
+const ROUTES = require('../constants/routes');
+
 const forAdmin = (req, res, next) => {
-    if (req.user.isAdmin) {
+    if (req.user && req.user.isAdmin) {
         return next();
     }
-    return res.status(599).render('error', {
+    if (req.path.includes(ROUTES.API.BASE)) {
+        return res.status(403).json({ message: 'You are not allowed to view this page' });
+    }
+    return res.status(403).render('error', {
         path: req.param,
         pageTitle: 'Error',
         pageHeader: 'Sorry, something went wrong.',
