@@ -1,4 +1,4 @@
-const User = require('../../models/user.model');
+const { isNotRegisteredEmail } = require('../../services/auth.service');
 
 function validateLoginForm(check) {
     return [
@@ -27,14 +27,8 @@ function validateRegistrationForm(check) {
             .isEmail()
             .normalizeEmail()
             .withMessage('Incorrect email address')
-            .custom((email) =>
-                User.findOne({ email }).then((user) => {
-                    if (user) {
-                        return Promise.reject('User with this email already exists.');
-                    }
-                    return Promise.resolve(true);
-                }),
-            ),
+            .custom(isNotRegisteredEmail)
+            .normalizeEmail(),
         check('confirmPassword').custom((value, { req }) => {
             if (value !== req.body.password) {
                 throw new Error('Password confirmation is incorrect');
