@@ -40,6 +40,14 @@ module.exports = {
                 IMAGE: '/api/latest/products/image',
                 PRODUCT: '/api/latest/products/:id',
             },
+            AUTH: {
+                BASE: '/api/latest/auth',
+                LOGIN: '/api/latest/auth/login',
+                LOGOUT: '/api/latest/auth/logout',
+                REGISTER: '/api/latest/auth/register',
+                CHANGE_PASSWORD: '/api/latest/auth/change-password',
+                RESET_PASSWORD: '/api/latest/auth/reset-password',
+            },
         },
     },
 };
