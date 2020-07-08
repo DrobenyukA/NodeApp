@@ -19,6 +19,10 @@ form {
   display: inline;
 }
 
+.hidden {
+  display: none!important;
+}
+
 .centered {
   text-align: center;
 }
@@ -219,6 +223,11 @@ form {
   cursor: pointer;
 }
 
+.btn-large {
+  padding: 6px 12px;
+  font-size: 1.25rem;
+}
+
 .btn:hover,
 .btn:active {
   background-color: #00695c;
@@ -339,4 +348,42 @@ form.btn-wrapper {
   padding: 0 15px;
   font-size: 1.25rem;
   text-align: right;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0, 0.35);
+  z-index: 9000;
+}
+
+.modal-container {
+  position: relative;
+  width: 50%;
+  height: 50%;
+  padding: 15px;
+  background-color: #fff;
+  box-shadow: 0 0 7px 5px rgba(0,0,0, 0.35);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #ccc;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.modal-close-btn:hover {
+  color: #aaa;
 }

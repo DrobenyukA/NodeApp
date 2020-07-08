@@ -1,9 +1,9 @@
+const { isEmpty } = require('lodash');
 const { validationResult } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
 const ProductModel = require('../models/product.model');
 const ProductsController = require('../controllers/products.controller');
-const { isEmpty } = require('../utils');
 const { getErrors } = require('../utils/errors');
 
 const getCart = ({ user, ...req }, res) =>

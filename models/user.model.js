@@ -14,7 +14,7 @@ const schema = new mongoose.Schema({
         required: true,
         validate: {
             validator: (v) => EMAIL.test(v),
-            message: (props) => `${props.value} is not a valid phone number!`,
+            message: (props) => `${props.value} is not a valid email!`,
         },
     },
     password: {
@@ -38,6 +38,12 @@ const schema = new mongoose.Schema({
             },
         ],
     },
+    products: [
+        {
+            type: ObjectId,
+            ref: PRODUCT,
+        },
+    ],
     isAdmin: Boolean,
     createdAt: {
         type: Date,

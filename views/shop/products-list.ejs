@@ -30,7 +30,13 @@
                                     <a href="<%= actions.editProduct.replace(':id', product._id) %>" class="btn" type="submit">
                                         Edit
                                     </a>
-                                    <%- include('../includes/delete-product.ejs', { action: actions.deleteProduct, id: product._id }) %>
+                                    <button
+                                        class="btn delete-btn"
+                                        data-product-id="<%= product._id %>"
+                                        data-action="<%= actions.deleteProduct %>"
+                                    >
+                                        Delete
+                                    </button>
                                 <% } %>
                             <% } %>
                             <a href="<%= actions.viewProduct.replace(':id', product._id) %>" class="btn" type="submit">
@@ -48,6 +54,7 @@
         <% } %>
     </main>
     <%- include('../includes/scripts.ejs') %>
+    <script src="/js/products-actions.js"></script>
 </body>
 
 </html>

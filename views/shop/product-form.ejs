@@ -13,7 +13,12 @@
     
     <main>
         <h1><%= pageHeader %></h1>
-        <form class="product-form" action="<%= actions.store %>" method="POST" enctype="multipart/form-data">
+        <form
+            id="product-form"
+            class="product-form"
+            action="<%= actions.store %>"
+            data-method="<% if (product._id) { %>PUT<% } else { %>POST<% }%>"
+        >
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
             <% if (product._id) { %>
                 <input type="hidden" name="id" value="<%= product._id %>"/>
@@ -29,45 +34,74 @@
                 <% } %>
             </div>
             <div class="form-control">
-                <label for="image">Image</label>
-                <input type="file" name="image" id="image"/>
-                <% if (errors.image) { %>
-                    <p class="alert"><%= errors.image %></p>
-                <% } %>
+                <img
+                    class="product-image <% if (!product.image) { %> hidden<% } %>"
+                    src="<%= product.image && product.image.src %>"
+                    alt="<%= product.image && product.image.alt %>"
+                />
+                <input type="hidden" name="imageSrc" value="<%= product.image && product.image.src %>" />
+                <input type="hidden" name="imageAlt" value="<%= product.image && product.image.alt %>" />
+                <button type="button" id="show-image-form-btn" class="btn">
+                    <% if (product._id) { %>
+                        Change image
+                    <% } else { %>
+                        Add image
+                    <% } %>
+                </button>
             </div>
-            <div class="form-control <% if (errors.imageAlt) { %> has-error <% } %>">
-                <label for="imageAlt">Alternative text</label>
-                <input type="text" name="imageAlt" id="imageAlt" value="<%= product.image && product.image.alt  %>"/>
-                <% if (errors.imageAlt) { %>
-                    <p class="alert"><%= errors.imageAlt %></p>
-                <% } %>
-            </div>
-            <div class="form-control <% if (errors.price) { %> has-error <% } %>">
+            <div class="form-control <% if (errors.price) { %> has-error<% } %>">
                 <label for="price">Price</label>
                 <input type="number" name="price" id="price" step="0.01" value="<%= product.price %>" />
                 <% if (errors.price) { %>
                     <p class="alert"><%= errors.price %></p>
                 <% } %>
             </div>
-            <div class="form-control <% if (errors.description) { %> has-error <% } %>">
+            <div class="form-control <% if (errors.description) { %> has-error<% } %>">
                 <label for="description">Description</label>
                 <textarea name="description" id="description" rows="5"><%= product.description %></textarea>
                 <% if (errors.description) { %>
                     <p class="alert"><%= errors.description %></p>
                 <% } %>
             </div>
-
-            <button type="submit" class="btn">
-                <% if (product._id) { %>
-                    Update Product
-                <% } else { %>
-                    Add Product
-                <% } %>
-            </button>
+            <div class="text-center">
+                <button type="submit" class="btn btn-large">
+                    <% if (product._id) { %>
+                        Update Product
+                    <% } else { %>
+                        Create Product
+                    <% } %>
+                </button>
+            </div>
         </form>
+        <div id="modal" class="modal hidden">
+            <div class="modal-container">
+                <button type="button" class="modal-close-btn">&times;</button>
+                <form
+                    id="product-image-form"
+                    class="product-image-form"
+                    action="<%= actions.upload %>"
+                    data-method="POST"
+                    method="POST"
+                >
+                    <div class="form-control">
+                        <label for="image">Image</label>
+                        <input type="file" name="image" id="image" />
+                        <p class="alert alert-image-src hidden"></p>
+                    </div>
+                    <div class="form-control <% if (errors.imageAlt) { %> has-error <% } %>">
+                        <label for="imageAlt">Alternative text</label>
+                        <input type="text" name="imageAlt" id="imageAlt" value="<%= product.image && product.image.alt  %>"/>
+                        <p class="alert alert-image-alt hidden"></p>
+                    </div>
+                    <button type="submit" class="btn">Upload</button>
+                </form>
+            </div>
+        </div>
     </main>
     
     <%- include('../includes/scripts.ejs') %>
+    <script type="text/javascript" src="/js/modal.js"></script>
+    <script type="text/javascript" src="/js/product-form.js"></script>
 
 </body>
 

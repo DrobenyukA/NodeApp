@@ -4,11 +4,12 @@ const { validationResult } = require('express-validator');
 
 const ROUTES = require('../constants/routes');
 const User = require('../models/user.model');
+const service = require('../services/auth.service');
 const mailer = require('../utils/mailer');
 const createResetEmail = require('../emails/resetPassword.email');
 const { getErrors } = require('../utils/errors');
-const { isEmpty } = require('../utils');
 
+// TODO: replace MODEL with SERVICE
 const renderSignInForm = (req, res, errors = {}) => {
     if (req.user) {
         return res.redirect(ROUTES.PRODUCTS.BASE);
@@ -80,74 +81,59 @@ const renderRestorePasswordForm = (req, res, next, errors = {}) => {
 };
 
 const register = (req, res) => {
-    const { name, email, password } = req.body;
-    const errors = getErrors(validationResult(req).array());
+    const { name, email, password } = service.getUserDataFromRequest(req);
+    const errorsList = validationResult(req);
 
-    if (!isEmpty(errors)) {
-        return res.status(422).render('auth/registration-form', {
-            path: req.path,
-            pageTitle: 'Registration',
-            pageHeader: 'Please fill in form to register',
-            actions: {
-                registration: ROUTES.AUTH.REGISTRATION,
-            },
-            user: undefined,
-            userData: { name, email },
-            errors,
-        });
+    if (errorsList.isEmpty()) {
+        return service
+            .createUser({ name, email, password })
+            .then(() =>
+                mailer.sendMail({
+                    to: email,
+                    from: 'andriy.drobenyuk@gmail.com',
+                    subject: 'Registration succeeded.',
+                    html: '<h1>You have been register successfully</h1>',
+                }),
+            )
+            .then(() => res.redirect('/auth/login'))
+            .catch(({ msg }) =>
+                res.status(422).render('auth/registration-form', {
+                    path: req.path,
+                    pageTitle: 'Registration',
+                    pageHeader: 'Please fill in form to register',
+                    actions: {
+                        registration: ROUTES.AUTH.REGISTRATION,
+                    },
+                    user: undefined,
+                    userData: { name, email },
+                    errors: {
+                        all: [{ msg }],
+                    },
+                }),
+            );
     }
-    return bcrypt
-        .hash(password, 12)
-        .then((password) =>
-            new User({
-                email,
-                name,
-                password,
-                cart: { items: [] },
-                isAdmin: false,
-            }).save(),
-        )
-        .then(() =>
-            mailer.sendMail({
-                to: email,
-                from: 'andriy.drobenyuk@gmail.com',
-                subject: 'Registration succeeded.',
-                html: '<h1>You have been register successfully</h1>',
-            }),
-        )
-        .then(() => res.redirect('/auth/login'))
-        .catch(({ msg }) =>
-            res.status(422).render('auth/registration-form', {
-                path: req.path,
-                pageTitle: 'Registration',
-                pageHeader: 'Please fill in form to register',
-                actions: {
-                    registration: ROUTES.AUTH.REGISTRATION,
-                },
-                user: undefined,
-                userData: { name, email },
-                errors: {
-                    all: [{ msg }],
-                },
-            }),
-        );
+
+    return res.status(422).render('auth/registration-form', {
+        path: req.path,
+        pageTitle: 'Registration',
+        pageHeader: 'Please fill in form to register',
+        actions: {
+            registration: ROUTES.AUTH.REGISTRATION,
+        },
+        user: undefined,
+        userData: { name, email },
+        errors: getErrors(errorsList.array()),
+    });
 };
 
 const login = (req, res) => {
-    const { email, password } = req.body;
-    const errors = getErrors(validationResult(req).array());
-    if (isEmpty(errors)) {
-        return User.findOne({ email })
+    const errorsList = validationResult(req);
+    if (errorsList.isEmpty()) {
+        return service
+            .getUserByEmailAndPassword(req.body)
             .then((user) => {
                 if (user) {
-                    return user;
-                }
-                throw new Error('Please enter valid credentials to sign in.');
-            })
-            .then((user) => bcrypt.compare(password, user.password).then((isEqual) => (isEqual ? user._id : undefined)))
-            .then((userId) => {
-                if (userId) {
-                    req.session.user = userId;
+                    req.session.user = user._id;
                     return res.redirect('/');
                 }
                 throw new Error('Please enter valid credentials to sign in.');
@@ -157,15 +143,15 @@ const login = (req, res) => {
                 return res.redirect(ROUTES.AUTH.LOGIN);
             });
     }
-    return renderSignInForm(req, res, undefined, errors);
+    return renderSignInForm(req, res, undefined, getErrors(errorsList.array()));
 };
 
 const logout = (req, res) => req.session.destroy(() => res.redirect('/auth/login'));
 
 const resetPassword = (req, res) => {
     const { email } = req.body;
-    const errors = getErrors(validationResult(req).array());
-    if (isEmpty(errors)) {
+    const errorsList = validationResult(req);
+    if (errorsList.isEmpty()) {
         return crypto.randomBytes(32, (error, buffer) => {
             if (error) {
                 req.flash('error', error.message);
@@ -193,7 +179,7 @@ const resetPassword = (req, res) => {
                 });
         });
     }
-    return renderResetPasswordForm(req, res, undefined, errors);
+    return renderResetPasswordForm(req, res, undefined, getErrors(errorsList.array()));
 };
 
 const restorePassword = (req, res) => {
