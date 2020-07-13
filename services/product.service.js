@@ -4,6 +4,7 @@ const path = require('path');
 const ProductModel = require('../models/product.model');
 const ROUTES = require('../constants/routes');
 const { PUBLIC } = require('../constants/path');
+const webSockets = require('../utils/webSockets');
 
 function getProductsById(id) {
     return ProductModel.findById(id);
@@ -43,7 +44,10 @@ function getProductsPage(page, productsPerPage) {
 }
 
 function saveProduct(product) {
-    return new ProductModel(product).save().then((result) => result);
+    return new ProductModel(product).save().then((result) => {
+        webSockets.getInstance().emit('product', { product: result });
+        return result;
+    });
 }
 
 const getProductImageSrc = (file) => `${ROUTES.IMAGES.PRODUCTS}/${file.filename}`;

@@ -10,7 +10,7 @@ const getCart = ({ user, ...req }, res) =>
     user
         .getCart()
         .then(({ products, totalPrice }) => {
-            return res.render('shop/cart', {
+            return res.render('pages/cart', {
                 path: req.path,
                 pageTitle: 'Cart',
                 pageHeader: 'My Products',

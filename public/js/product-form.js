@@ -60,7 +60,12 @@ const handleProductFormSubmit = (e) => {
             }
             return resp.json();
         })
-        .then((res) => (window.location.href = `/products/${res._id}`))
+        .then(() => {
+            const image = document.querySelector('.product-image');
+            image.classList.add('hidden');
+            image.src = '';
+            document.querySelector('#product-form').reset();
+        })
         .catch(({ message }) => alert(message));
 };
 

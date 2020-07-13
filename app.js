@@ -16,14 +16,15 @@ const configs = require('./settings/configs');
 const settings = require('./settings');
 const { PUBLIC } = require('./constants/path');
 const { startServer } = require('./utils/server');
+const webSockets = require('./utils/webSockets');
 
 const app = express();
 
 app.set('view engine', configs.viewEngine);
 
-app.use(logger.logRequest);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(logger.logRequest);
 app.use(express.static(PUBLIC));
 app.use(session(configs.session));
 app.use(withUser);
@@ -36,4 +37,5 @@ app.use(appRouter);
 
 db.connect()
     .then(() => startServer(app, settings.general.port))
+    .then(webSockets.init)
     .catch(({ message }) => logger.logError(message));
