@@ -24,7 +24,7 @@ const handleProductError = ({ user, path }, res, next, error) =>
     });
 
 const renderProductForm = ({ user, path }, res, next, errors = {}) => {
-    res.render('shop/product-form', {
+    res.render('pages/product-form', {
         path,
         pageTitle: 'Add product',
         pageHeader: 'Add product',
@@ -43,7 +43,7 @@ const renderProducts = (req, res, next) => {
     return service
         .getProductsPage(page, PRODUCTS_PER_PAGE)
         .then(([products, pages]) =>
-            res.render('shop/products-list', {
+            res.render('pages/products-list', {
                 path: req.path,
                 pageTitle: 'Books shop',
                 pageHeader: 'My Products',
@@ -71,7 +71,7 @@ const renderProduct = (req, res, next) => {
     return new Promise((res, rej) => (isEmpty(errors) ? res(service.getProductsById(id)) : rej(new Error(errors.id))))
         .then((product) => {
             if (product) {
-                return res.render('shop/product-details', {
+                return res.render('pages/product-details', {
                     path: req.path,
                     pageTitle: `Books shop | ${product.title}`,
                     pageHeader: `Product ${product.title}`,
@@ -94,7 +94,7 @@ const renderProductEditForm = (req, res, next) => {
     return new Promise((res) => (isEmpty(errors) ? res(service.getProductsById(id)) : res(errors.id)))
         .then((product) => {
             if (product) {
-                return res.render('shop/product-form', {
+                return res.render('pages/product-form', {
                     path: req.path,
                     pageTitle: 'Edit product',
                     pageHeader: `Edit ${product.title || 'product'}`,

@@ -40,7 +40,7 @@ const getIndex = ({ user, ...req }, res, next) =>
         .sort({ createdAt: -1 })
         .limit(PRODUCTS_PER_PAGE)
         .then((products) => {
-            res.render('shop/index', {
+            res.render('pages/index', {
                 path: req.path,
                 pageTitle: 'Home page',
                 pageHeader: 'Home page',
@@ -59,7 +59,7 @@ const getIndex = ({ user, ...req }, res, next) =>
 const getOrders = ({ user, ...req }, res) => {
     OrderModel.find()
         .then((orders) => {
-            return res.render('shop/orders', {
+            return res.render('pages/orders', {
                 path: req.path,
                 pageTitle: 'Orders',
                 pageHeader: 'Orders',
@@ -170,7 +170,7 @@ const renderCheckoutPage = (req, res, next) => {
                 .then((session) => [cart, session]),
         )
         .then(([cart, session]) => {
-            return res.render('shop/checkout', {
+            return res.render('pages/checkout', {
                 path: req.path,
                 pageTitle: 'Checkout',
                 pageHeader: 'Checkout',
