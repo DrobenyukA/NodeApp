@@ -130,7 +130,7 @@ const login = (req, res) => {
     const errorsList = validationResult(req);
     if (errorsList.isEmpty()) {
         return service
-            .getUserByEmailAndPassword(req.body)
+            .getUserByEmailAndPassword(req.body, true)
             .then((user) => {
                 if (user) {
                     req.session.user = user._id;

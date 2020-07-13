@@ -29,7 +29,7 @@ const getClientUser = (user) => ({
     roles: [user.isAdmin ? 'admin' : 'customer'],
 });
 
-const getUserByEmailAndPassword = ({ email, password }) =>
+const getUserByEmailAndPassword = ({ email, password }, withID = false) =>
     User.findOne({ email })
         .then((user) => {
             if (isUndefined(user)) {
@@ -44,6 +44,9 @@ const getUserByEmailAndPassword = ({ email, password }) =>
         })
         .then((user) => {
             const token = jwt.sign({ userId: user._id.toString() }, auth.secret, { expiresIn: '15m' });
+            if (withID) {
+                return user;
+            }
             return { ...getClientUser(user), token };
         });
 
