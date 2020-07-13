@@ -11,7 +11,7 @@ const { validateRegistrationForm } = require('../middlewares/validation/user.val
 const forAdmin = require('../middlewares/forAdmin');
 
 const router = express.Router();
-const { PRODUCTS, AUTH } = API.LATEST;
+const { PRODUCTS, AUTH, CHAT } = API.LATEST;
 
 router.get(PRODUCTS.BASE, productsController.readProducts);
 router.post(PRODUCTS.BASE, forAdmin, validateBook(check), productsController.createProduct);

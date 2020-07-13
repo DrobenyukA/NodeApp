@@ -342,6 +342,10 @@ form.btn-wrapper {
   cursor: pointer;
 }
 
+.alert-link {
+  color: inherit;
+}
+
 #notifications-container {
   position: fixed;
   top: 70px;
